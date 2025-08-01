@@ -6,8 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.algashop.domain.exceptions.ClienteArquivadoException;
-import com.algashop.domain.models.Cliente_3;
-import com.algashop.domain.models.Cliente_4;
+import com.algashop.domain.models.Cliente;
 import com.algashop.domain.utils.UUIDGenerator;
 
 public class ClienteTestes {
@@ -17,7 +16,7 @@ public class ClienteTestes {
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> {
-                new Cliente_3(
+                new Cliente(
                     UUIDGenerator.generateTimeBaseUuid(),
                     "Fulano da Silva Sauro",
                     "inválido",
@@ -31,7 +30,7 @@ public class ClienteTestes {
     @Test
     void testeAtualizarClienteComEmailValido() {
 
-        Cliente_3 cliente = new Cliente_3(
+        Cliente cliente = new Cliente(
             UUIDGenerator.generateTimeBaseUuid(),
             "Fulano da Silva Sauro",
             "fulano.sauro@email.com",
@@ -50,7 +49,7 @@ public class ClienteTestes {
 
     @Test
     void arquivarCliente() {
-        Cliente_4 cliente = new Cliente_4(
+        Cliente cliente = new Cliente(
             UUIDGenerator.generateTimeBaseUuid(),
             "Fulano da Silva Sauro",
             "fulano.sauro@email.com",
@@ -70,7 +69,7 @@ public class ClienteTestes {
 
     @Test
     void tentarArquivarClienteJaArquivado() {
-        Cliente_4 cliente = new Cliente_4(
+        Cliente cliente = new Cliente(
             UUIDGenerator.generateTimeBaseUuid(),
             "Fulano da Silva Sauro",
             "fulano.sauro@email.com",
@@ -102,7 +101,7 @@ public class ClienteTestes {
 
     @Test
     void arquivarClienteAdicionarPontos() {
-        Cliente_4 cliente = new Cliente_4(
+        Cliente cliente = new Cliente(
             UUIDGenerator.generateTimeBaseUuid(),
             "Fulano da Silva Sauro",
             null, 
@@ -124,7 +123,7 @@ public class ClienteTestes {
 
     @Test
     void arquivarClienteAdicionarPontosNegativosGeraException() {
-        Cliente_4 cliente = new Cliente_4(
+        Cliente cliente = new Cliente(
             UUIDGenerator.generateTimeBaseUuid(),
             "Fulano da Silva Sauro",
             null, 

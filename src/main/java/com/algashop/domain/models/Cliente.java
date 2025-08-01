@@ -5,10 +5,11 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.commons.validator.routines.EmailValidator;
+import com.algashop.domain.exceptions.ClienteArquivadoException;
+import com.algashop.domain.exceptions.MensagensErros;
+import com.algashop.domain.validators.ValidacaoCampos;
 
-// adicionando validações na entidade
-public class Cliente_3 {
+public class Cliente {
     
     private UUID id;
     private String nome;
@@ -23,11 +24,11 @@ public class Cliente_3 {
     private Integer pontosFidelidade;
     
     // construtor sem argumentos
-    public Cliente_3() {
+    public Cliente() {
     }
 
     // construtor com todos os argumentos
-    public Cliente_3(UUID id, String nome, LocalDate nascimento, String email, 
+    public Cliente(UUID id, String nome, LocalDate nascimento, String email, 
         String telefone, String cpf, Boolean notificacoesPromocoesPermitidas, 
         Boolean arquivado, OffsetDateTime cadastradoEm,
         OffsetDateTime arquivadoEm, Integer pontosFidelidade) {
@@ -47,7 +48,7 @@ public class Cliente_3 {
     }
 
     // construtor para cadastrar novo cliente
-    public Cliente_3(UUID id, String nome, String email, String cpf, 
+    public Cliente(UUID id, String nome, String email, String cpf, 
         Boolean notificacoesPromocoesPermitidas, OffsetDateTime cadastradoEm) {
         
         this.setId(id);
@@ -62,29 +63,48 @@ public class Cliente_3 {
 
     // métodos para alterar ações na entidade cliente
     public void adicionarPontos(Integer pontos) {
+        verificarSePodeEditar();
+
+        if (pontos <= 0) {
+            throw new IllegalArgumentException();
+        }
+
+        this.setPontosFidelidade(this.pontosFidelidade() + pontos);
     }
 
     public void arquivar() {
+        verificarSePodeEditar();
+        this.setArquivado(true);
         this.setArquivadoEm(OffsetDateTime.now());
+        this.setNome("Anonymous");
+        this.setEmail(UUID.randomUUID() + "@anonymous.com");
+        this.setCpf("000.000.000-00");
+        this.setNascimento(null);
+        this.setNotificacoesPromocoesPermitidas(false);
     }
 
     public void habilitarNotificacoes() {
+        verificarSePodeEditar();
         this.setNotificacoesPromocoesPermitidas(true);
     }
 
     public void desabilitarNotificacoes() {
+        verificarSePodeEditar();
         this.setNotificacoesPromocoesPermitidas(false);
     }
 
     public void alterarNome(String nome) {
+        verificarSePodeEditar();
         this.setNome(nome);
     }
 
     public void alterarEmail(String email) {
+        verificarSePodeEditar();
         this.setEmail(email);
     }
 
     public void alterarTelefone(String telefone) {
+        verificarSePodeEditar();
         this.setTelefone(telefone);
     }
 
@@ -117,7 +137,7 @@ public class Cliente_3 {
         return notificacoesPromocoesPermitidas;
     }
 
-    public Boolean arquivado() {
+    public Boolean estaArquivado() {
         return arquivado;
     }
 
@@ -140,10 +160,10 @@ public class Cliente_3 {
     }
 
     private void setNome(String nome) {
-        Objects.requireNonNull(nome);
+        Objects.requireNonNull(MensagensErros.VALIDACAO_ERRO_NOME_NULO);
 
         if (nome.isBlank()) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(MensagensErros.VALIDACAO_ERRO_NOME_BRANCO);
         }
 
         this.nome = nome;
@@ -158,23 +178,14 @@ public class Cliente_3 {
 
         // valida se for maior que data atual
         if (nascimento.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(MensagensErros.VALIDACAO_ERRO_NASCIMENTO);
         }
 
         this.nascimento = nascimento;
     }
 
     private void setEmail(String email) {
-        Objects.requireNonNull(email);
-
-        if (email.isBlank()) {
-            throw new IllegalArgumentException();
-        }
-
-        // se o e-mail não for válido (dependência commons-validator)
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw new IllegalArgumentException();
-        }
+        ValidacaoCampos.requerEmailValido(email, MensagensErros.VALIDACAO_ERRO_EMAIL_INVALIDO);
         this.email = email;
     }
 
@@ -210,7 +221,19 @@ public class Cliente_3 {
 
     private void setPontosFidelidade(Integer pontosFidelidade) {
         Objects.requireNonNull(pontosFidelidade);
+
+        // deve aceitar apenas pontos positivos
+        if (pontosFidelidade < 0) {
+            throw new IllegalArgumentException();
+        }
+
         this.pontosFidelidade = pontosFidelidade;
+    }
+
+    private void verificarSePodeEditar() {
+        if (this.estaArquivado()) {
+            throw new ClienteArquivadoException();
+        }
     }
 
     // método HashCode and Equals (pelo editor IntelliJ Idea gera um código diferente)
@@ -230,7 +253,7 @@ public class Cliente_3 {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Cliente_3 other = (Cliente_3) obj;
+        Cliente other = (Cliente) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
