@@ -8,6 +8,7 @@ import com.algashop.domain.exceptions.ClienteArquivadoException;
 import com.algashop.domain.exceptions.MensagensErros;
 import com.algashop.domain.valueObjects.ClienteCPF;
 import com.algashop.domain.valueObjects.ClienteEmail;
+import com.algashop.domain.valueObjects.ClienteEndereco;
 import com.algashop.domain.valueObjects.ClienteId;
 import com.algashop.domain.valueObjects.ClienteNascimento;
 import com.algashop.domain.valueObjects.ClienteNome;
@@ -27,6 +28,7 @@ public class Cliente {
     private OffsetDateTime cadastradoEm;
     private OffsetDateTime arquivadoEm;
     private ClientePontosFidelidade pontosFidelidade;
+    private ClienteEndereco endereco;
     
     // construtor sem argumentos
     public Cliente() {
@@ -35,8 +37,8 @@ public class Cliente {
     // construtor com todos os argumentos
     public Cliente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
         ClienteTelefone telefone, ClienteCPF cpf, Boolean notificacoesPromocoesPermitidas, 
-        Boolean arquivado, OffsetDateTime cadastradoEm,
-        OffsetDateTime arquivadoEm, ClientePontosFidelidade pontosFidelidade) {
+        Boolean arquivado, OffsetDateTime cadastradoEm, OffsetDateTime arquivadoEm, 
+        ClientePontosFidelidade pontosFidelidade, ClienteEndereco endereco) {
         
         // alterados para chamarem os métodos setters com validações
         this.setId(id);
@@ -50,11 +52,13 @@ public class Cliente {
         this.setCadastradoEm(cadastradoEm);
         this.setArquivado(arquivado);
         this.setPontosFidelidade(pontosFidelidade);
+        this.setEndereco(endereco);
     }
 
     // construtor para cadastrar novo cliente
     public Cliente(ClienteId id, ClienteNome nome, ClienteEmail email, ClienteCPF cpf, 
-        Boolean notificacoesPromocoesPermitidas, OffsetDateTime cadastradoEm) {
+        Boolean notificacoesPromocoesPermitidas, OffsetDateTime cadastradoEm,
+        ClienteEndereco endereco) {
         
         this.setId(id);
         this.setNome(nome);
@@ -67,6 +71,7 @@ public class Cliente {
         // poderia ser da forma abaixo ou da forma a seguir
         //this.setPontosFidelidade(new ClientePontosFidelidade(0));
         this.setPontosFidelidade(ClientePontosFidelidade.ZERO);
+        this.setEndereco(endereco);
     }
 
     // métodos para alterar ações na entidade cliente
@@ -91,6 +96,12 @@ public class Cliente {
         this.setCpf(new ClienteCPF("000.000.000-00"));
         this.setNascimento(null);
         this.setNotificacoesPromocoesPermitidas(false);
+        // tornando o cliente anônimo ao arquivar (pelo rua e complemento)
+        ClienteEndereco.ClienteEnderecoBuilder builder = this.endereco.toBuilder();
+        this.setEndereco(builder.logradouro("Anonymous").complemento(null).build());
+        // poderia ser da forma abaixo também (é a mesma que acima)
+        /*this.setEndereco(this.getEndereco().toBuilder()
+            .logradouro("Anônimo").complemento(null).build());*/
     }
 
     public void habilitarNotificacoes() {
@@ -116,6 +127,13 @@ public class Cliente {
     public void alterarTelefone(ClienteTelefone telefone) {
         verificarSePodeEditar();
         this.setTelefone(telefone);
+    }
+
+    public void alterarEndereco(ClienteEndereco endereco) {
+        // verificar se o cliente não está arquivado
+        verificarSePodeEditar();
+
+        this.setEndereco(endereco);
     }
 
     // métodos getters (no editor IntelliJ Idea tem record styles - sem get)
@@ -161,6 +179,10 @@ public class Cliente {
 
     public ClientePontosFidelidade pontosFidelidade() {
         return pontosFidelidade;
+    }
+
+    public ClienteEndereco getEndereco() {
+        return endereco;
     }
 
     // métodos setters (private)
@@ -238,6 +260,11 @@ public class Cliente {
         }*/
 
         this.pontosFidelidade = pontosFidelidade;
+    }
+
+    public void setEndereco(ClienteEndereco endereco) {
+        Objects.requireNonNull(endereco);
+        this.endereco = endereco;
     }
 
     private void verificarSePodeEditar() {

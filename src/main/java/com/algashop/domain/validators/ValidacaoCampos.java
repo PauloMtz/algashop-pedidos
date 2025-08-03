@@ -9,6 +9,18 @@ public class ValidacaoCampos {
     // construtor privado
     private ValidacaoCampos() {}
 
+    public static void requerCampoPreenchido(String valor) {
+        requerCampoPreenchido(valor, "");
+    }
+
+    public static void requerCampoPreenchido(String valor, String mensagemErro) {
+        Objects.requireNonNull(valor);
+
+        if (valor.isBlank()) {
+            throw new IllegalArgumentException();
+        }
+    }
+
     public static void requerEmailValido(String email) {
         requerEmailValido(email, null);
     }

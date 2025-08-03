@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import com.algashop.domain.exceptions.ClienteArquivadoException;
 import com.algashop.domain.models.Cliente;
+import com.algashop.domain.valueObjects.ClienteCEP;
 import com.algashop.domain.valueObjects.ClienteCPF;
 import com.algashop.domain.valueObjects.ClienteEmail;
+import com.algashop.domain.valueObjects.ClienteEndereco;
 import com.algashop.domain.valueObjects.ClienteId;
 import com.algashop.domain.valueObjects.ClienteNome;
 import com.algashop.domain.valueObjects.ClientePontosFidelidade;
@@ -29,7 +31,14 @@ public class ClienteTestes {
                     new ClienteEmail("email-inválido"),
                     new ClienteCPF("123.456.789-01"),
                     false,
-                    OffsetDateTime.now()
+                    OffsetDateTime.now(),
+                    ClienteEndereco.builder()
+                        .logradouro("Rua Cinco de Outubro, 997")
+                        .bairro("Vila Norte")
+                        .cidade("Água Branca")
+                        .estado("Goiás")
+                        .cep(new ClienteCEP("12345678"))
+                        .build()
                 );
             });
     }
@@ -47,7 +56,14 @@ public class ClienteTestes {
             //"123.456.789-01",
             new ClienteCPF("123.456.789-01"),
             false,
-            OffsetDateTime.now()
+            OffsetDateTime.now(),
+            ClienteEndereco.builder()
+                .logradouro("Rua Cinco de Outubro, 997")
+                .bairro("Vila Norte")
+                .cidade("Água Branca")
+                .estado("Goiás")
+                .cep(new ClienteCEP("12345678"))
+                .build()
         );
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
@@ -70,16 +86,35 @@ public class ClienteTestes {
             //"123.456.789-01",
             new ClienteCPF("123.456.789-01"),
             false,
-            OffsetDateTime.now()
+            OffsetDateTime.now(),
+            ClienteEndereco.builder()
+                .logradouro("Rua Cinco de Outubro, 997")
+                .bairro("Vila Norte")
+                .cidade("Água Branca")
+                .estado("Goiás")
+                .cep(new ClienteCEP("12345678"))
+                .build()
         );
 
         cliente.arquivar();
+
         Assertions.assertWith(cliente, 
             c -> Assertions.assertThat(c.nome()).isEqualTo(new ClienteNome("Anonymous", "Anonymous")),
             c -> Assertions.assertThat(c.email()).isNotEqualTo(new ClienteEmail("fulano.sauro@email.com")),
             c -> Assertions.assertThat(c.cpf()).isEqualTo(new ClienteCPF("000.000.000-00")),
             c -> Assertions.assertThat(c.nascimento()).isNull(),
-            c -> Assertions.assertThat(c.notificacoesPromocoesPermitidas()).isFalse());
+            c -> Assertions.assertThat(c.notificacoesPromocoesPermitidas()).isFalse(),
+            c -> Assertions.assertThat(c.getEndereco()).isEqualTo(
+                    ClienteEndereco.builder()
+                        .logradouro("Anonymous")
+                        .complemento(null)
+                        .bairro("Vila Norte")
+                        .cidade("Água Branca")
+                        .estado("Goiás")
+                        .cep(new ClienteCEP("12345678"))
+                        .build()
+                )
+            );
     }
 
     @Test
@@ -94,7 +129,14 @@ public class ClienteTestes {
             //"123.456.789-01",
             new ClienteCPF("123.456.789-01"),
             false,
-            OffsetDateTime.now()
+            OffsetDateTime.now(),
+            ClienteEndereco.builder()
+                .logradouro("Rua Cinco de Outubro, 997")
+                .bairro("Vila Norte")
+                .cidade("Água Branca")
+                .estado("Goiás")
+                .cep(new ClienteCEP("12345678"))
+                .build()
         );
 
         cliente.arquivar();
@@ -135,7 +177,14 @@ public class ClienteTestes {
             false, 
             OffsetDateTime.now(),
             null, 
-            new ClientePontosFidelidade(10)
+            new ClientePontosFidelidade(10),
+            ClienteEndereco.builder()
+                .logradouro("Rua Cinco de Outubro, 997")
+                .bairro("Vila Norte")
+                .cidade("Água Branca")
+                .estado("Goiás")
+                .cep(new ClienteCEP("12345678"))
+                .build()
         );
 
         cliente.adicionarPontos(new ClientePontosFidelidade(15));
@@ -162,7 +211,14 @@ public class ClienteTestes {
             false, 
             OffsetDateTime.now(),
             null, 
-            new ClientePontosFidelidade(0)
+            new ClientePontosFidelidade(0),
+            ClienteEndereco.builder()
+                .logradouro("Rua Cinco de Outubro, 997")
+                .bairro("Vila Norte")
+                .cidade("Água Branca")
+                .estado("Goiás")
+                .cep(new ClienteCEP("12345678"))
+                .build()
         );
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
