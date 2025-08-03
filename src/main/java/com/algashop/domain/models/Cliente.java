@@ -1,37 +1,42 @@
 package com.algashop.domain.models;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
 import com.algashop.domain.exceptions.ClienteArquivadoException;
 import com.algashop.domain.exceptions.MensagensErros;
-import com.algashop.domain.validators.ValidacaoCampos;
+import com.algashop.domain.valueObjects.ClienteCPF;
+import com.algashop.domain.valueObjects.ClienteEmail;
+import com.algashop.domain.valueObjects.ClienteId;
+import com.algashop.domain.valueObjects.ClienteNascimento;
+import com.algashop.domain.valueObjects.ClienteNome;
+import com.algashop.domain.valueObjects.ClientePontosFidelidade;
+import com.algashop.domain.valueObjects.ClienteTelefone;
 
 public class Cliente {
     
-    private UUID id;
-    private String nome;
-    private LocalDate nascimento;
-    private String email;
-    private String telefone;
-    private String cpf;
+    private ClienteId id;
+    private ClienteNome nome;
+    private ClienteNascimento nascimento;
+    private ClienteEmail email;
+    private ClienteTelefone telefone;
+    private ClienteCPF cpf;
     private Boolean notificacoesPromocoesPermitidas;
     private Boolean arquivado;
     private OffsetDateTime cadastradoEm;
     private OffsetDateTime arquivadoEm;
-    private Integer pontosFidelidade;
+    private ClientePontosFidelidade pontosFidelidade;
     
     // construtor sem argumentos
     public Cliente() {
     }
 
     // construtor com todos os argumentos
-    public Cliente(UUID id, String nome, LocalDate nascimento, String email, 
-        String telefone, String cpf, Boolean notificacoesPromocoesPermitidas, 
+    public Cliente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
+        ClienteTelefone telefone, ClienteCPF cpf, Boolean notificacoesPromocoesPermitidas, 
         Boolean arquivado, OffsetDateTime cadastradoEm,
-        OffsetDateTime arquivadoEm, Integer pontosFidelidade) {
+        OffsetDateTime arquivadoEm, ClientePontosFidelidade pontosFidelidade) {
         
         // alterados para chamarem os métodos setters com validações
         this.setId(id);
@@ -48,7 +53,7 @@ public class Cliente {
     }
 
     // construtor para cadastrar novo cliente
-    public Cliente(UUID id, String nome, String email, String cpf, 
+    public Cliente(ClienteId id, ClienteNome nome, ClienteEmail email, ClienteCPF cpf, 
         Boolean notificacoesPromocoesPermitidas, OffsetDateTime cadastradoEm) {
         
         this.setId(id);
@@ -58,27 +63,32 @@ public class Cliente {
         this.setNotificacoesPromocoesPermitidas(notificacoesPromocoesPermitidas);
         this.setCadastradoEm(cadastradoEm);
         this.setArquivado(false);
-        this.setPontosFidelidade(0);
+        //this.setPontosFidelidade(0);
+        // poderia ser da forma abaixo ou da forma a seguir
+        //this.setPontosFidelidade(new ClientePontosFidelidade(0));
+        this.setPontosFidelidade(ClientePontosFidelidade.ZERO);
     }
 
     // métodos para alterar ações na entidade cliente
-    public void adicionarPontos(Integer pontos) {
+    public void adicionarPontos(ClientePontosFidelidade pontos) {
         verificarSePodeEditar();
 
-        if (pontos <= 0) {
+        // essa validação não precisa, porque já tem no valueObject
+        /*if (pontos <= 0) {
             throw new IllegalArgumentException();
-        }
+        }*/
 
-        this.setPontosFidelidade(this.pontosFidelidade() + pontos);
+        //this.setPontosFidelidade(this.pontosFidelidade() + pontos);
+        this.setPontosFidelidade(this.pontosFidelidade().adicionarPontos(pontos));
     }
 
     public void arquivar() {
         verificarSePodeEditar();
         this.setArquivado(true);
         this.setArquivadoEm(OffsetDateTime.now());
-        this.setNome("Anonymous");
-        this.setEmail(UUID.randomUUID() + "@anonymous.com");
-        this.setCpf("000.000.000-00");
+        this.setNome(new ClienteNome("Anonymous", "Anonymous"));
+        this.setEmail(new ClienteEmail(UUID.randomUUID() + "@anonymous.com"));
+        this.setCpf(new ClienteCPF("000.000.000-00"));
         this.setNascimento(null);
         this.setNotificacoesPromocoesPermitidas(false);
     }
@@ -93,43 +103,43 @@ public class Cliente {
         this.setNotificacoesPromocoesPermitidas(false);
     }
 
-    public void alterarNome(String nome) {
+    public void alterarNome(ClienteNome nome) {
         verificarSePodeEditar();
         this.setNome(nome);
     }
 
-    public void alterarEmail(String email) {
+    public void alterarEmail(ClienteEmail email) {
         verificarSePodeEditar();
         this.setEmail(email);
     }
 
-    public void alterarTelefone(String telefone) {
+    public void alterarTelefone(ClienteTelefone telefone) {
         verificarSePodeEditar();
         this.setTelefone(telefone);
     }
 
     // métodos getters (no editor IntelliJ Idea tem record styles - sem get)
-    public UUID id() {
+    public ClienteId id() {
         return id;
     }
 
-    public String nome() {
+    public ClienteNome nome() {
         return nome;
     }
 
-    public LocalDate nascimento() {
+    public ClienteNascimento nascimento() {
         return nascimento;
     }
 
-    public String email() {
+    public ClienteEmail email() {
         return email;
     }
 
-    public String telefone() {
+    public ClienteTelefone telefone() {
         return telefone;
     }
 
-    public String cpf() {
+    public ClienteCPF cpf() {
         return cpf;
     }
 
@@ -149,53 +159,53 @@ public class Cliente {
         return arquivadoEm;
     }
 
-    public Integer pontosFidelidade() {
+    public ClientePontosFidelidade pontosFidelidade() {
         return pontosFidelidade;
     }
 
     // métodos setters (private)
-    private void setId(UUID id) {
+    private void setId(ClienteId id) {
         Objects.requireNonNull(id);
         this.id = id;
     }
 
-    private void setNome(String nome) {
+    private void setNome(ClienteNome nome) {
         Objects.requireNonNull(MensagensErros.VALIDACAO_ERRO_NOME_NULO);
 
-        if (nome.isBlank()) {
+        // já tem essa validação lá no valueObject
+        /*if (nome.isBlank()) {
             throw new IllegalArgumentException(MensagensErros.VALIDACAO_ERRO_NOME_BRANCO);
-        }
+        }*/
 
         this.nome = nome;
     }
 
-    private void setNascimento(LocalDate nascimento) {
+    private void setNascimento(ClienteNascimento nascimento) {
         // valida se for nulo
         if (nascimento == null) {
             this.nascimento = null;
             return;
         }
 
-        // valida se for maior que data atual
-        if (nascimento.isAfter(LocalDate.now())) {
+        /*if (nascimento.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException(MensagensErros.VALIDACAO_ERRO_NASCIMENTO);
-        }
+        }*/
 
         this.nascimento = nascimento;
     }
 
-    private void setEmail(String email) {
-        ValidacaoCampos.requerEmailValido(email, MensagensErros.VALIDACAO_ERRO_EMAIL_INVALIDO);
+    private void setEmail(ClienteEmail email) {
+        //ValidacaoCampos.requerEmailValido(email, MensagensErros.VALIDACAO_ERRO_EMAIL_INVALIDO);
         this.email = email;
     }
 
-    private void setTelefone(String telefone) {
-        Objects.requireNonNull(telefone);
+    private void setTelefone(ClienteTelefone telefone) {
+        //Objects.requireNonNull(telefone);
         this.telefone = telefone;
     }
 
-    private void setCpf(String cpf) {
-        Objects.requireNonNull(cpf);
+    private void setCpf(ClienteCPF cpf) {
+        //Objects.requireNonNull(cpf);
         this.cpf = cpf;
     }
 
@@ -219,13 +229,13 @@ public class Cliente {
         this.arquivadoEm = arquivadoEm;
     }
 
-    private void setPontosFidelidade(Integer pontosFidelidade) {
+    private void setPontosFidelidade(ClientePontosFidelidade pontosFidelidade) {
         Objects.requireNonNull(pontosFidelidade);
 
-        // deve aceitar apenas pontos positivos
-        if (pontosFidelidade < 0) {
+        // essa validação também não precisa, porque já tem no valueObject
+        /*if (pontosFidelidade < 0) {
             throw new IllegalArgumentException();
-        }
+        }*/
 
         this.pontosFidelidade = pontosFidelidade;
     }

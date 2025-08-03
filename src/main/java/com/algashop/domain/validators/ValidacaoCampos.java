@@ -10,7 +10,7 @@ public class ValidacaoCampos {
     private ValidacaoCampos() {}
 
     public static void requerEmailValido(String email) {
-        requerEmailValido(email);
+        requerEmailValido(email, null);
     }
 
     public static void requerEmailValido(String email, String mensagemErro) {
