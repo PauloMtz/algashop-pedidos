@@ -71,7 +71,7 @@ public class ClienteTestesDataBuilder {
             .telefone(new ClienteTelefone("(00) 0000-0000"))
             .cpf(new ClienteCPF("000.000.000-00"))
             .notificacoesPromocoesPermitidas(false)
-            .arquivado(true) // alterar conforme o teste
+            .arquivado(false) // alterar conforme o teste
             .cadastradoEm(OffsetDateTime.now())
             .arquivadoEm(OffsetDateTime.now())
             .pontosFidelidade(new ClientePontosFidelidade(10))

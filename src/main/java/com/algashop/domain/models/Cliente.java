@@ -32,24 +32,9 @@ public class Cliente {
     private ClientePontosFidelidade pontosFidelidade;
     private ClienteEndereco endereco;
     
-    // construtor sem argumentos
     public Cliente() {
     }
 
-    // criando novo cliente com static factory method
-    // pode utilizar um Builder junto com a static factory
-    // nesse caso, o método poderá passar a ser privado
-    /*@Builder(builderClassName = "NovoClienteBuild", builderMethodName = "novoCliente")
-    public static Cliente novoCliente(ClienteNome nome, ClienteNascimento nascimento, 
-        ClienteEmail email, ClienteTelefone telefone, ClienteCPF cpf, 
-        Boolean notificacoesPromocoesPermitidas, ClienteEndereco endereco) {
-        
-        return new Cliente(new ClienteId(), nome, nascimento, email, telefone, cpf, 
-            notificacoesPromocoesPermitidas, false, OffsetDateTime.now(), 
-            null, ClientePontosFidelidade.ZERO, endereco);
-    }*/
-
-    // ----------------------------------------------------------------------
     // sugestão ChatGpt
     @Builder(builderClassName = "NovoClienteBuilder", builderMethodName = "builderNovoCliente")
     private Cliente(ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
@@ -73,20 +58,6 @@ public class Cliente {
         return new Cliente(nome, nascimento, email, telefone, cpf, 
             notificacoesPromocoesPermitidas, endereco);
     }
-    // ----------------------------------------------------------------------
-
-    // static factory method para cliente existente
-    // mesma coisa com Builder
-    /*@Builder(builderClassName = "ClienteExistenteBuilder", builderMethodName = "clienteExistente")
-    public static Cliente clienteExistente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
-        ClienteTelefone telefone, ClienteCPF cpf, Boolean notificacoesPromocoesPermitidas, 
-        Boolean arquivado, OffsetDateTime cadastradoEm, OffsetDateTime arquivadoEm, 
-        ClientePontosFidelidade pontosFidelidade, ClienteEndereco endereco) {
-
-        return new Cliente(id, nome, nascimento, email, telefone, cpf, 
-            notificacoesPromocoesPermitidas, arquivado, cadastradoEm, arquivadoEm, 
-            pontosFidelidade, endereco);
-    }*/
 
     @Builder(builderClassName = "ClienteExistenteBuilder", builderMethodName = "clienteExistenteBuilder")
     public static Cliente clienteExistente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email,
@@ -98,14 +69,13 @@ public class Cliente {
             notificacoesPromocoesPermitidas, arquivado, cadastradoEm, arquivadoEm,
             pontosFidelidade, endereco);
     }
+    // Fim - sugestão ChatGpt
 
-    // o construtor passa a ser privado
     private Cliente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
         ClienteTelefone telefone, ClienteCPF cpf, Boolean notificacoesPromocoesPermitidas, 
         Boolean arquivado, OffsetDateTime cadastradoEm, OffsetDateTime arquivadoEm, 
         ClientePontosFidelidade pontosFidelidade, ClienteEndereco endereco) {
         
-        // alterados para chamarem os métodos setters com validações
         this.setId(id);
         this.setNome(nome);
         this.setNascimento(nascimento);
@@ -120,35 +90,9 @@ public class Cliente {
         this.setEndereco(endereco);
     }
 
-    // construtor para cadastrar novo cliente
-    /*public Cliente(ClienteId id, ClienteNome nome, ClienteEmail email, ClienteCPF cpf, 
-        Boolean notificacoesPromocoesPermitidas, OffsetDateTime cadastradoEm,
-        ClienteEndereco endereco) {
-        
-        this.setId(id);
-        this.setNome(nome);
-        this.setEmail(email);
-        this.setCpf(cpf);
-        this.setNotificacoesPromocoesPermitidas(notificacoesPromocoesPermitidas);
-        this.setCadastradoEm(cadastradoEm);
-        this.setArquivado(false);
-        //this.setPontosFidelidade(0);
-        // poderia ser da forma abaixo ou da forma a seguir
-        //this.setPontosFidelidade(new ClientePontosFidelidade(0));
-        this.setPontosFidelidade(ClientePontosFidelidade.ZERO);
-        this.setEndereco(endereco);
-    }*/
-
     // métodos para alterar ações na entidade cliente
     public void adicionarPontos(ClientePontosFidelidade pontos) {
         verificarSePodeEditar();
-
-        // essa validação não precisa, porque já tem no valueObject
-        /*if (pontos <= 0) {
-            throw new IllegalArgumentException();
-        }*/
-
-        //this.setPontosFidelidade(this.pontosFidelidade() + pontos);
         this.setPontosFidelidade(this.pontosFidelidade().adicionarPontos(pontos));
     }
 
@@ -161,12 +105,8 @@ public class Cliente {
         this.setCpf(new ClienteCPF("000.000.000-00"));
         this.setNascimento(null);
         this.setNotificacoesPromocoesPermitidas(false);
-        // tornando o cliente anônimo ao arquivar (pelo rua e complemento)
         ClienteEndereco.ClienteEnderecoBuilder builder = this.endereco.toBuilder();
         this.setEndereco(builder.logradouro("Anonymous").complemento(null).build());
-        // poderia ser da forma abaixo também (é a mesma que acima)
-        /*this.setEndereco(this.getEndereco().toBuilder()
-            .logradouro("Anônimo").complemento(null).build());*/
     }
 
     public void habilitarNotificacoes() {
@@ -201,7 +141,7 @@ public class Cliente {
         this.setEndereco(endereco);
     }
 
-    // métodos getters (no editor IntelliJ Idea tem record styles - sem get)
+    // métodos getters
     public ClienteId id() {
         return id;
     }
@@ -250,7 +190,7 @@ public class Cliente {
         return endereco;
     }
 
-    // métodos setters (private)
+    // métodos setters
     private void setId(ClienteId id) {
         Objects.requireNonNull(id);
         this.id = id;
@@ -258,12 +198,6 @@ public class Cliente {
 
     private void setNome(ClienteNome nome) {
         Objects.requireNonNull(nome, MensagensErros.VALIDACAO_ERRO_NOME_NULO);
-
-        // já tem essa validação lá no valueObject
-        /*if (nome.isBlank()) {
-            throw new IllegalArgumentException(MensagensErros.VALIDACAO_ERRO_NOME_BRANCO);
-        }*/
-
         this.nome = nome;
     }
 
@@ -274,25 +208,18 @@ public class Cliente {
             return;
         }
 
-        /*if (nascimento.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException(MensagensErros.VALIDACAO_ERRO_NASCIMENTO);
-        }*/
-
         this.nascimento = nascimento;
     }
 
     private void setEmail(ClienteEmail email) {
-        //ValidacaoCampos.requerEmailValido(email, MensagensErros.VALIDACAO_ERRO_EMAIL_INVALIDO);
         this.email = email;
     }
 
     private void setTelefone(ClienteTelefone telefone) {
-        //Objects.requireNonNull(telefone);
         this.telefone = telefone;
     }
 
     private void setCpf(ClienteCPF cpf) {
-        //Objects.requireNonNull(cpf);
         this.cpf = cpf;
     }
 
@@ -318,12 +245,6 @@ public class Cliente {
 
     private void setPontosFidelidade(ClientePontosFidelidade pontosFidelidade) {
         Objects.requireNonNull(pontosFidelidade);
-
-        // essa validação também não precisa, porque já tem no valueObject
-        /*if (pontosFidelidade < 0) {
-            throw new IllegalArgumentException();
-        }*/
-
         this.pontosFidelidade = pontosFidelidade;
     }
 
@@ -338,7 +259,6 @@ public class Cliente {
         }
     }
 
-    // método HashCode and Equals (pelo editor IntelliJ Idea gera um código diferente)
     @Override
     public int hashCode() {
         final int prime = 31;
