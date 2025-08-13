@@ -9,7 +9,7 @@ import lombok.Builder;
 @Builder(toBuilder = true)
 public record ClienteEndereco(String logradouro, String complemento, String bairro,
     String cidade, String estado, ClienteCEP cep ) {
-       
+      
     public ClienteEndereco {
         ValidacaoCampos.requerCampoPreenchido(logradouro);
         ValidacaoCampos.requerCampoPreenchido(bairro);

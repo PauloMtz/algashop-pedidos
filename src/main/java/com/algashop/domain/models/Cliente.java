@@ -15,6 +15,8 @@ import com.algashop.domain.valueObjects.ClienteNome;
 import com.algashop.domain.valueObjects.ClientePontosFidelidade;
 import com.algashop.domain.valueObjects.ClienteTelefone;
 
+import lombok.Builder;
+
 public class Cliente {
     
     private ClienteId id;
@@ -34,8 +36,71 @@ public class Cliente {
     public Cliente() {
     }
 
-    // construtor com todos os argumentos
-    public Cliente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
+    // criando novo cliente com static factory method
+    // pode utilizar um Builder junto com a static factory
+    // nesse caso, o método poderá passar a ser privado
+    /*@Builder(builderClassName = "NovoClienteBuild", builderMethodName = "novoCliente")
+    public static Cliente novoCliente(ClienteNome nome, ClienteNascimento nascimento, 
+        ClienteEmail email, ClienteTelefone telefone, ClienteCPF cpf, 
+        Boolean notificacoesPromocoesPermitidas, ClienteEndereco endereco) {
+        
+        return new Cliente(new ClienteId(), nome, nascimento, email, telefone, cpf, 
+            notificacoesPromocoesPermitidas, false, OffsetDateTime.now(), 
+            null, ClientePontosFidelidade.ZERO, endereco);
+    }*/
+
+    // ----------------------------------------------------------------------
+    // sugestão ChatGpt
+    @Builder(builderClassName = "NovoClienteBuilder", builderMethodName = "builderNovoCliente")
+    private Cliente(ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
+                    ClienteTelefone telefone, ClienteCPF cpf, 
+                    Boolean notificacoesPromocoesPermitidas, ClienteEndereco endereco) {
+
+        this(new ClienteId(), nome, nascimento, email, telefone, cpf,
+            notificacoesPromocoesPermitidas, false, OffsetDateTime.now(), 
+            null, ClientePontosFidelidade.ZERO, endereco);
+    }
+
+    public static NovoClienteBuilder novoCliente() {
+        return builderNovoCliente();
+    }
+
+    // Factory method manual (parâmetros diretos)
+    public static Cliente novoCliente(ClienteNome nome, ClienteNascimento nascimento, 
+        ClienteEmail email, ClienteTelefone telefone, ClienteCPF cpf, 
+        Boolean notificacoesPromocoesPermitidas, ClienteEndereco endereco) {
+        
+        return new Cliente(nome, nascimento, email, telefone, cpf, 
+            notificacoesPromocoesPermitidas, endereco);
+    }
+    // ----------------------------------------------------------------------
+
+    // static factory method para cliente existente
+    // mesma coisa com Builder
+    /*@Builder(builderClassName = "ClienteExistenteBuilder", builderMethodName = "clienteExistente")
+    public static Cliente clienteExistente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
+        ClienteTelefone telefone, ClienteCPF cpf, Boolean notificacoesPromocoesPermitidas, 
+        Boolean arquivado, OffsetDateTime cadastradoEm, OffsetDateTime arquivadoEm, 
+        ClientePontosFidelidade pontosFidelidade, ClienteEndereco endereco) {
+
+        return new Cliente(id, nome, nascimento, email, telefone, cpf, 
+            notificacoesPromocoesPermitidas, arquivado, cadastradoEm, arquivadoEm, 
+            pontosFidelidade, endereco);
+    }*/
+
+    @Builder(builderClassName = "ClienteExistenteBuilder", builderMethodName = "clienteExistenteBuilder")
+    public static Cliente clienteExistente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email,
+            ClienteTelefone telefone, ClienteCPF cpf, Boolean notificacoesPromocoesPermitidas,
+            Boolean arquivado, OffsetDateTime cadastradoEm, OffsetDateTime arquivadoEm,
+            ClientePontosFidelidade pontosFidelidade, ClienteEndereco endereco) {
+
+        return new Cliente(id, nome, nascimento, email, telefone, cpf,
+            notificacoesPromocoesPermitidas, arquivado, cadastradoEm, arquivadoEm,
+            pontosFidelidade, endereco);
+    }
+
+    // o construtor passa a ser privado
+    private Cliente(ClienteId id, ClienteNome nome, ClienteNascimento nascimento, ClienteEmail email, 
         ClienteTelefone telefone, ClienteCPF cpf, Boolean notificacoesPromocoesPermitidas, 
         Boolean arquivado, OffsetDateTime cadastradoEm, OffsetDateTime arquivadoEm, 
         ClientePontosFidelidade pontosFidelidade, ClienteEndereco endereco) {
@@ -50,13 +115,13 @@ public class Cliente {
         this.setNotificacoesPromocoesPermitidas(notificacoesPromocoesPermitidas);
         this.setArquivado(arquivado);
         this.setCadastradoEm(cadastradoEm);
-        this.setArquivado(arquivado);
+        this.setArquivadoEm(arquivadoEm);
         this.setPontosFidelidade(pontosFidelidade);
         this.setEndereco(endereco);
     }
 
     // construtor para cadastrar novo cliente
-    public Cliente(ClienteId id, ClienteNome nome, ClienteEmail email, ClienteCPF cpf, 
+    /*public Cliente(ClienteId id, ClienteNome nome, ClienteEmail email, ClienteCPF cpf, 
         Boolean notificacoesPromocoesPermitidas, OffsetDateTime cadastradoEm,
         ClienteEndereco endereco) {
         
@@ -72,7 +137,7 @@ public class Cliente {
         //this.setPontosFidelidade(new ClientePontosFidelidade(0));
         this.setPontosFidelidade(ClientePontosFidelidade.ZERO);
         this.setEndereco(endereco);
-    }
+    }*/
 
     // métodos para alterar ações na entidade cliente
     public void adicionarPontos(ClientePontosFidelidade pontos) {
@@ -91,8 +156,8 @@ public class Cliente {
         verificarSePodeEditar();
         this.setArquivado(true);
         this.setArquivadoEm(OffsetDateTime.now());
-        this.setNome(new ClienteNome("Anonymous", "Anonymous"));
-        this.setEmail(new ClienteEmail(UUID.randomUUID() + "@anonymous.com"));
+        this.setNome(new ClienteNome("Cliente", "Anônimo"));
+        this.setEmail(new ClienteEmail(UUID.randomUUID() + "@anonimo.com"));
         this.setCpf(new ClienteCPF("000.000.000-00"));
         this.setNascimento(null);
         this.setNotificacoesPromocoesPermitidas(false);
@@ -192,7 +257,7 @@ public class Cliente {
     }
 
     private void setNome(ClienteNome nome) {
-        Objects.requireNonNull(MensagensErros.VALIDACAO_ERRO_NOME_NULO);
+        Objects.requireNonNull(nome, MensagensErros.VALIDACAO_ERRO_NOME_NULO);
 
         // já tem essa validação lá no valueObject
         /*if (nome.isBlank()) {

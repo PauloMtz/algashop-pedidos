@@ -1,6 +1,7 @@
 package com.algashop.models;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,64 +12,40 @@ import com.algashop.domain.valueObjects.ClienteCEP;
 import com.algashop.domain.valueObjects.ClienteCPF;
 import com.algashop.domain.valueObjects.ClienteEmail;
 import com.algashop.domain.valueObjects.ClienteEndereco;
+import com.algashop.domain.valueObjects.ClienteId;
 import com.algashop.domain.valueObjects.ClienteNascimento;
 import com.algashop.domain.valueObjects.ClienteNome;
 import com.algashop.domain.valueObjects.ClientePontosFidelidade;
 import com.algashop.domain.valueObjects.ClienteTelefone;
 
-public class ClienteTestes {
-
-    // agora, utilizando Builder() nas factories, tem que refatorar os testes
-    // para chamar os builders
+public class ClienteTestes_2 {
     
     @Test
     void testeCadastroClienteComEmailInvalido() {
 
-        /*Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> Cliente.novoCliente()
-                //.id(new ClienteId())
-                .nome(new ClienteNome("Fulano ", "da Silva Sauro"))
-                .nascimento(new ClienteNascimento(LocalDate.of(1991, 12, 07)))
-                .email(new ClienteEmail("email-inválido"))
-                .telefone(new ClienteTelefone("(00) 0001-0002"))
-                .cpf(new ClienteCPF("123.456.789-01"))
-                .notificacoesPromocoesPermitidas(false)
-                .endereco(ClienteEndereco.builder()
-                    .logradouro("Rua Cinco de Outubro, 997")
-                    .bairro("Vila Norte")
-                    .cidade("Água Branca")
-                    .estado("Goiás")
-                    .cep(new ClienteCEP("12345678"))
-                    .build())
-                .build());*/
-
-        // sugestão ChatGpt
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> Cliente.novoCliente()
-                //.id(new ClienteId())
-                .nome(new ClienteNome("Fulano", "da Silva Sauro"))
-                .nascimento(new ClienteNascimento(LocalDate.of(1991, 12, 7)))
-                .email(new ClienteEmail("email-inválido"))
-                .telefone(new ClienteTelefone("(00) 0001-0002"))
-                .cpf(new ClienteCPF("123.456.789-01"))
-                .notificacoesPromocoesPermitidas(false)
-                .endereco(ClienteEndereco.builder()
-                    .logradouro("Rua Cinco de Outubro, 997")
-                    .bairro("Vila Norte")
-                    .cidade("Água Branca")
-                    .estado("Goiás")
-                    .cep(new ClienteCEP("12345678"))
-                    .build())
-                .build());
-
-        /*Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> ClienteTestesDataBuilder.novoCliente().email(new ClienteEmail("email-inválido")).build());*/
+            .isThrownBy(() -> Cliente.novoCliente(
+                    new ClienteNome("Fulano ", "da Silva Sauro"),
+                    new ClienteNascimento(LocalDate.of(1991, 12, 07)),
+                    new ClienteEmail("email-inválido"),
+                    new ClienteTelefone("(00) 0001-0002"),
+                    new ClienteCPF("123.456.789-01"),
+                    false,
+                    ClienteEndereco.builder()
+                        .logradouro("Rua Cinco de Outubro, 997")
+                        .bairro("Vila Norte")
+                        .cidade("Água Branca")
+                        .estado("Goiás")
+                        .cep(new ClienteCEP("12345678"))
+                        .build()
+                )
+            );
     }
 
     @Test
     void testeAtualizarClienteComEmailValido() {
 
-        /*Cliente cliente = Cliente.novoCliente(
+        Cliente cliente = Cliente.novoCliente(
             new ClienteNome("Fulano ", "da Silva Sauro"),
             new ClienteNascimento(LocalDate.of(1991, 12, 07)),
             new ClienteEmail("fulano.sauro@email.com"),
@@ -82,9 +59,7 @@ public class ClienteTestes {
                 .estado("Goiás")
                 .cep(new ClienteCEP("12345678"))
                 .build()
-        );*/
-
-        Cliente cliente = ClienteTestesDataBuilder.novoCliente().build();
+        );
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> {
@@ -94,7 +69,7 @@ public class ClienteTestes {
 
     @Test
     void arquivarCliente() {
-        /*Cliente cliente = Cliente.novoCliente(
+        Cliente cliente = Cliente.novoCliente(
             new ClienteNome("Fulano ", "da Silva Sauro"),
             new ClienteNascimento(LocalDate.of(1991, 12, 07)),
             new ClienteEmail("fulano.sauro@email.com"),
@@ -107,16 +82,14 @@ public class ClienteTestes {
                 .cidade("Água Branca")
                 .estado("Goiás")
                 .cep(new ClienteCEP("12345678"))
-                .build());*/
-
-        // neste teste, arquivado deve estar false
-        Cliente cliente = ClienteTestesDataBuilder.clienteAnonimizado().build();
+                .build()
+        );
 
         cliente.arquivar();
 
         Assertions.assertWith(cliente, 
-            c -> Assertions.assertThat(c.nome()).isEqualTo(new ClienteNome("Cliente", "Anônimo")),
-            c -> Assertions.assertThat(c.email()).isNotEqualTo(new ClienteEmail("email@anonimo.com")),
+            c -> Assertions.assertThat(c.nome()).isEqualTo(new ClienteNome("Anonymous", "Anonymous")),
+            c -> Assertions.assertThat(c.email()).isNotEqualTo(new ClienteEmail("fulano.sauro@email.com")),
             c -> Assertions.assertThat(c.cpf()).isEqualTo(new ClienteCPF("000.000.000-00")),
             c -> Assertions.assertThat(c.nascimento()).isNull(),
             c -> Assertions.assertThat(c.notificacoesPromocoesPermitidas()).isFalse(),
@@ -135,7 +108,7 @@ public class ClienteTestes {
 
     @Test
     void tentarArquivarClienteJaArquivado() {
-        /*Cliente cliente = Cliente.novoCliente(
+        Cliente cliente = Cliente.novoCliente(
             new ClienteNome("Fulano ", "da Silva Sauro"),
             new ClienteNascimento(LocalDate.of(1991, 12, 07)),
             new ClienteEmail("fulano.sauro@email.com"),
@@ -148,10 +121,10 @@ public class ClienteTestes {
                 .cidade("Água Branca")
                 .estado("Goiás")
                 .cep(new ClienteCEP("12345678"))
-                .build());*/
+                .build()
+        );
 
-        // neste teste, arquivado deve estar true
-        Cliente cliente = ClienteTestesDataBuilder.clienteAnonimizado().build();
+        cliente.arquivar();
 
         Assertions.assertThatExceptionOfType(ClienteArquivadoException.class)
             .isThrownBy(cliente::arquivar);
@@ -174,7 +147,7 @@ public class ClienteTestes {
 
     @Test
     void arquivarClienteAdicionarPontos() {
-        /*Cliente cliente = Cliente.clienteExistente(
+        Cliente cliente = Cliente.clienteExistente(
             new ClienteId(),
             new ClienteNome("Fulano ", "da Silva Sauro"),
             null, 
@@ -192,9 +165,8 @@ public class ClienteTestes {
                 .cidade("Água Branca")
                 .estado("Goiás")
                 .cep(new ClienteCEP("12345678"))
-                .build());*/
-
-        Cliente cliente = ClienteTestesDataBuilder.clienteExistente().build();
+                .build()
+        );
 
         cliente.adicionarPontos(new ClientePontosFidelidade(15));
         cliente.adicionarPontos(new ClientePontosFidelidade(12));
@@ -204,7 +176,7 @@ public class ClienteTestes {
 
     @Test
     void arquivarClienteAdicionarPontosNegativosGeraException() {
-        /*Cliente cliente = Cliente.clienteExistente(
+        Cliente cliente = Cliente.clienteExistente(
             new ClienteId(),
             new ClienteNome("Fulano ", "da Silva Sauro"),
             null,
@@ -223,9 +195,7 @@ public class ClienteTestes {
                 .estado("Goiás")
                 .cep(new ClienteCEP("12345678"))
                 .build()
-        );*/
-
-        Cliente cliente = ClienteTestesDataBuilder.clienteExistente().build();
+        );
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> cliente.adicionarPontos(new ClientePontosFidelidade(-10)));
