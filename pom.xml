@@ -62,6 +62,12 @@
 			<artifactId>java-uuid-generator</artifactId>
 			<version>5.1.0</version>
 		</dependency>
+		<!-- para geração de TSID -->
+		<dependency>
+			<groupId>io.hypersistence</groupId>
+			<artifactId>hypersistence-tsid</artifactId>
+			<version>2.1.4</version>
+		</dependency>
 		<!-- para as validações nas entidades -->
 		<dependency>
 			<groupId>commons-validator</groupId>

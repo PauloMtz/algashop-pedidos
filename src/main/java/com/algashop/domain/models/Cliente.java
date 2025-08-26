@@ -9,11 +9,11 @@ import com.algashop.domain.exceptions.MensagensErros;
 import com.algashop.domain.valueObjects.ClienteCPF;
 import com.algashop.domain.valueObjects.ClienteEmail;
 import com.algashop.domain.valueObjects.ClienteEndereco;
-import com.algashop.domain.valueObjects.ClienteId;
 import com.algashop.domain.valueObjects.ClienteNascimento;
 import com.algashop.domain.valueObjects.ClienteNome;
 import com.algashop.domain.valueObjects.ClientePontosFidelidade;
 import com.algashop.domain.valueObjects.ClienteTelefone;
+import com.algashop.domain.valueObjects.id.ClienteId;
 
 import lombok.Builder;
 
