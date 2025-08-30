@@ -27,7 +27,7 @@ public class PedidoNaoFeitoException extends DomainException {
             String.format(MensagensErros.ERRO_PEDIDO_INFO_COBRANCA, pedidoId));
     }
 
-    public static PedidoNaoFeitoException valorEntregaInvalido(PedidoId pedidoId) {
+    /*public static PedidoNaoFeitoException valorEntregaInvalido(PedidoId pedidoId) {
         return new PedidoNaoFeitoException(
             String.format(MensagensErros.ERRO_PEDIDO_VALOR_ENTREGA, pedidoId));
     }
@@ -35,7 +35,7 @@ public class PedidoNaoFeitoException extends DomainException {
     public static PedidoNaoFeitoException previsaoEntregaInvalida(PedidoId pedidoId) {
         return new PedidoNaoFeitoException(
             String.format(MensagensErros.ERRO_PEDIDO_PREVISAO_ENTREGA, pedidoId));
-    }
+    }*/
 
     public static PedidoNaoFeitoException metodoPagamentoInvalido(PedidoId pedidoId) {
         return new PedidoNaoFeitoException(

@@ -1,17 +1,19 @@
 package com.algashop.domain.valueObjects;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 import lombok.Builder;
 
-@Builder
-public record InformacoesEntrega(ClienteNome nome, ClienteCPF cpf, 
-    ClienteTelefone telefone, ClienteEndereco endereco) {
+// esse toBuilder permite converter esse value object em outro já com as propriedades populadas
+@Builder(toBuilder = true)
+public record InformacoesEntrega(Moeda valorEntrega, LocalDate previsaoEntrega, 
+	Destinatario cliente, ClienteEndereco endereco) {
 
     public InformacoesEntrega {
-		Objects.requireNonNull(nome);
-		Objects.requireNonNull(cpf);
-		Objects.requireNonNull(telefone);
+		Objects.requireNonNull(valorEntrega);
+		Objects.requireNonNull(previsaoEntrega);
+		Objects.requireNonNull(cliente);
 		Objects.requireNonNull(endereco);
 	}
 }

@@ -3,6 +3,7 @@ package com.algashop.domain.models;
 import java.util.Objects;
 
 import com.algashop.domain.valueObjects.Moeda;
+import com.algashop.domain.valueObjects.Produto;
 import com.algashop.domain.valueObjects.ProdutoNome;
 import com.algashop.domain.valueObjects.Quantidade;
 import com.algashop.domain.valueObjects.id.PedidoId;
@@ -37,11 +38,15 @@ public class PedidoItem {
 
     // factory
     @Builder(builderClassName = "NovoPedidoItemBuilder", builderMethodName = "novoPedidoItemBuilder")
-    private static PedidoItem novoPedidoItem(PedidoId pedidoId, ProdutoId produtoId, 
-        ProdutoNome produtoNome, Moeda preco, Quantidade qtde) {
+    private static PedidoItem novoPedidoItem(PedidoId pedidoId, Produto produto, Quantidade qtde) {
+
+        Objects.requireNonNull(produto);
+        Objects.requireNonNull(pedidoId);
+        Objects.requireNonNull(qtde);
 
         PedidoItem pedidoItem = new PedidoItem(
-            new PedidoItemId(), pedidoId, produtoId, produtoNome, preco, qtde, Moeda.ZERO
+            new PedidoItemId(), pedidoId, produto.id(), produto.nome(),
+                produto.preco(), qtde, Moeda.ZERO
         );
 
         pedidoItem.recalcularTotal();

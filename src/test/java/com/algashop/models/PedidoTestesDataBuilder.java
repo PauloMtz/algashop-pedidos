@@ -8,16 +8,16 @@ import com.algashop.domain.models.Pedido;
 import com.algashop.domain.utils.IDGenerator;
 import com.algashop.domain.valueObjects.ClienteCEP;
 import com.algashop.domain.valueObjects.ClienteCPF;
+import com.algashop.domain.valueObjects.ClienteEmail;
 import com.algashop.domain.valueObjects.ClienteEndereco;
 import com.algashop.domain.valueObjects.ClienteNome;
 import com.algashop.domain.valueObjects.ClienteTelefone;
+import com.algashop.domain.valueObjects.Destinatario;
 import com.algashop.domain.valueObjects.InformacoesCobranca;
 import com.algashop.domain.valueObjects.InformacoesEntrega;
 import com.algashop.domain.valueObjects.Moeda;
-import com.algashop.domain.valueObjects.ProdutoNome;
 import com.algashop.domain.valueObjects.Quantidade;
 import com.algashop.domain.valueObjects.id.ClienteId;
-import com.algashop.domain.valueObjects.id.ProdutoId;
 
 public class PedidoTestesDataBuilder {
     
@@ -29,8 +29,8 @@ public class PedidoTestesDataBuilder {
 
     private ClienteId clienteId = new ClienteId(IDGenerator.generateTimeBaseUuid());
     private FormasPagamento formaPagamento = FormasPagamento.DEBITO;
-    private Moeda valorEntrega = new Moeda("10.00");
-    private LocalDate previsaoEntrega = LocalDate.now().plusWeeks(1);
+    //private Moeda valorEntrega = new Moeda("10.00");
+    //private LocalDate previsaoEntrega = LocalDate.now().plusWeeks(1);
     private InformacoesEntrega entrega = infoEntrega();
     private InformacoesCobranca faturamento = infoCobranca();
     private boolean pedidoTemItens = true;
@@ -44,16 +44,20 @@ public class PedidoTestesDataBuilder {
 
     public Pedido build() {
         Pedido pedido = Pedido.rascunhoPedido(clienteId);
-        pedido.alterarEntrega(entrega, valorEntrega, previsaoEntrega);
+        pedido.alterarEntrega(entrega/*valorEntrega, previsaoEntrega*/);
         pedido.alterarInfoFaturamento(faturamento);
         pedido.alterarFormaPagamento(formaPagamento);
 
         if (pedidoTemItens) {
-            pedido.adicionarItem(new ProdutoId(), new ProdutoNome("Produto Teste"), 
-                new Moeda("50"), new Quantidade(3));
+            pedido.adicionarItem(
+                ProdutoTestesDataBuilder.novoProduto().build(), 
+                new Quantidade(3)
+            );
 
-            pedido.adicionarItem(new ProdutoId(), new ProdutoNome("Produto Teste II"), 
-                new Moeda("75"), new Quantidade(2));
+            pedido.adicionarItem(
+                ProdutoTestesDataBuilder.produtoAleatorio().build(), 
+                new Quantidade(2)
+            );
         }
 
         switch (this.statusPedido) {
@@ -74,10 +78,27 @@ public class PedidoTestesDataBuilder {
 
     public static InformacoesEntrega infoEntrega() {
         return InformacoesEntrega.builder()
+            .valorEntrega(new Moeda("10"))
+            .previsaoEntrega(LocalDate.now().plusWeeks(1))
             .endereco(enderecoCliente())
-            .nome(new ClienteNome("Fulano", "de Tal"))
-            .cpf(new ClienteCPF("123.456.789-01"))
-            .telefone(new ClienteTelefone("(01) 0001-0002"))
+            .cliente(Destinatario.builder()
+                .nome(new ClienteNome("Fulano", "de Tal"))
+                .cpf(new ClienteCPF("123.456.789-01"))
+                .telefone(new ClienteTelefone("(01) 0001-0002"))
+            .build())
+        .build();
+    }
+
+    public static InformacoesEntrega infoEntregaAlternativa() {
+        return InformacoesEntrega.builder()
+            .valorEntrega(new Moeda("20.00"))
+            .previsaoEntrega(LocalDate.now().plusWeeks(2))
+            .endereco(enderecoCliente())
+            .cliente(Destinatario.builder()
+                .nome(new ClienteNome("Ciclano", "de Tal"))
+                .cpf(new ClienteCPF("123.456.789-01"))
+                .telefone(new ClienteTelefone("(02) 0003-0004"))
+            .build())
         .build();
     }
 
@@ -87,6 +108,7 @@ public class PedidoTestesDataBuilder {
             .cpf(new ClienteCPF("123.456.789-01"))
             .telefone(new ClienteTelefone("(00) 0001-0002"))
             .nome(new ClienteNome("Fulano", "de Tal"))
+            .email(new ClienteEmail("fulano@email.com"))
         .build();
     }
 
@@ -96,6 +118,17 @@ public class PedidoTestesDataBuilder {
             .complemento("teste")
             .bairro("Bairro Teste")
             .cidade("Cidade Teste")
+            .estado("TT")
+            .cep(new ClienteCEP("12345678"))
+        .build();
+    }
+
+    public static ClienteEndereco enderecoAlternativo() {
+        return ClienteEndereco.builder()
+            .logradouro("Rua Teste Alternativo, 101")
+            .complemento("teste alternativo")
+            .bairro("Bairro Teste Alternativo")
+            .cidade("Cidade Teste Alternativo")
             .estado("TT")
             .cep(new ClienteCEP("12345678"))
         .build();
@@ -113,7 +146,7 @@ public class PedidoTestesDataBuilder {
         return this;
     }
 
-    public PedidoTestesDataBuilder setValorEntrega(Moeda valorEntrega) {
+    /*public PedidoTestesDataBuilder setValorEntrega(Moeda valorEntrega) {
         this.valorEntrega = valorEntrega;
         return this;
     }
@@ -121,7 +154,7 @@ public class PedidoTestesDataBuilder {
     public PedidoTestesDataBuilder setPrevisaoEntrega(LocalDate previsaoEntrega) {
         this.previsaoEntrega = previsaoEntrega;
         return this;
-    }
+    }*/
 
     public PedidoTestesDataBuilder setEntrega(InformacoesEntrega entrega) {
         this.entrega = entrega;
