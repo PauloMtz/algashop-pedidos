@@ -22,7 +22,6 @@ public class PedidoItem {
     private Quantidade qtde;
     private Moeda valorTotal;
 
-    // construtor com todos os parâmetros
     @Builder(builderClassName = "PedidoItemExistente", builderMethodName = "pedidoItemExistente")
     public PedidoItem(PedidoItemId pedidoItemId, PedidoId pedidoId, ProdutoId produtoId, 
         ProdutoNome produtoNome, Moeda preco, Quantidade qtde, Moeda valorTotal) {
@@ -36,7 +35,6 @@ public class PedidoItem {
         this.setValorTotal(valorTotal);
     }
 
-    // factory
     @Builder(builderClassName = "NovoPedidoItemBuilder", builderMethodName = "novoPedidoItemBuilder")
     private static PedidoItem novoPedidoItem(PedidoId pedidoId, Produto produto, Quantidade qtde) {
 
@@ -53,8 +51,6 @@ public class PedidoItem {
         return pedidoItem;
     }
 
-    // métodos para alterar ações na classe
-    // esse método só será usado dentro desse pacote (models)
     void alterarQtde(Quantidade quantid) {
         Objects.requireNonNull(quantid);
         this.setQtde(quantid);
@@ -65,7 +61,6 @@ public class PedidoItem {
         this.setValorTotal(this.getPreco().multiplicar(this.getQtde()));
     }
 
-    // getters
     public PedidoItemId getPedidoItemId() {
         return pedidoItemId;
     }
@@ -94,7 +89,6 @@ public class PedidoItem {
         return valorTotal;
     }
 
-    // setters - private
     private void setPedidoItemId(PedidoItemId pedidoItemId) {
         Objects.requireNonNull(pedidoItemId);
         this.pedidoItemId = pedidoItemId;

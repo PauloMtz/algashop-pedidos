@@ -53,8 +53,7 @@ public class PedidoProntoTestes {
         Pedido pedido = PedidoTestesDataBuilder.novoPedido().setStatusPedido(PedidoStatus.PRONTO).build();
 
         Assertions.assertThatExceptionOfType(StatusPedidoNaoPodeAlterarException.class)
-                .isThrownBy(() -> pedido.pedidoPronto()); 
-                //.isThrownBy(pedido::pedidoPronto); // equivale à linha acima
+                .isThrownBy(() -> pedido.pedidoPronto());
 
         Assertions.assertWith(pedido,
                 (p) -> Assertions.assertThat(p.getStatusPedido()).isEqualTo(PedidoStatus.PRONTO),

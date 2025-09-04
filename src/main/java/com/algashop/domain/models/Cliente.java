@@ -90,7 +90,6 @@ public class Cliente {
         this.setEndereco(endereco);
     }
 
-    // métodos para alterar ações na entidade cliente
     public void adicionarPontos(ClientePontosFidelidade pontos) {
         verificarSePodeEditar();
         this.setPontosFidelidade(this.pontosFidelidade().adicionarPontos(pontos));
@@ -202,7 +201,6 @@ public class Cliente {
     }
 
     private void setNascimento(ClienteNascimento nascimento) {
-        // valida se for nulo
         if (nascimento == null) {
             this.nascimento = null;
             return;

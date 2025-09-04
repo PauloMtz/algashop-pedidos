@@ -21,17 +21,9 @@ import com.algashop.domain.valueObjects.id.ClienteId;
 import com.algashop.models.ProdutoTestesDataBuilder;
 
 public class PedidoTestesDataBuilder {
-    
-    /*public static Pedido.PedidoExistenteBuilder pedidoExistente() {
-        return Pedido.pedidoExistenteBuilder()
-            .atributos aqui
-        .build();
-    }*/
 
     private ClienteId clienteId = new ClienteId(IDGenerator.generateTimeBaseUuid());
     private FormasPagamento formaPagamento = FormasPagamento.DEBITO;
-    //private Moeda valorEntrega = new Moeda("10.00");
-    //private LocalDate previsaoEntrega = LocalDate.now().plusWeeks(1);
     private InformacoesEntrega entrega = infoEntrega();
     private InformacoesCobranca faturamento = infoCobranca();
     private boolean pedidoTemItens = true;
@@ -45,7 +37,7 @@ public class PedidoTestesDataBuilder {
 
     public Pedido build() {
         Pedido pedido = Pedido.rascunhoPedido(clienteId);
-        pedido.alterarEntrega(entrega/*valorEntrega, previsaoEntrega*/);
+        pedido.alterarEntrega(entrega);
         pedido.alterarInfoFaturamento(faturamento);
         pedido.alterarFormaPagamento(formaPagamento);
 
@@ -62,7 +54,8 @@ public class PedidoTestesDataBuilder {
         }
 
         switch (this.statusPedido) {
-            case RASCUNHO -> {}
+            case RASCUNHO -> {
+            }
             case FEITO -> {
                 pedido.confirmarPedido();
             }
@@ -75,7 +68,9 @@ public class PedidoTestesDataBuilder {
                 pedido.pedidoPago();
                 pedido.pedidoPronto();
             }
-            case CANCELADO -> {}
+            case CANCELADO -> {
+                pedido.cancelarPedido();
+            }
         }
 
         return pedido;
@@ -139,8 +134,6 @@ public class PedidoTestesDataBuilder {
         .build();
     }
 
-    // setters da classe builder
-    // gera os setters, troca o void pelo nome da classe e adiciona o retorno
     public PedidoTestesDataBuilder setClienteId(ClienteId clienteId) {
         this.clienteId = clienteId;
         return this;
@@ -150,16 +143,6 @@ public class PedidoTestesDataBuilder {
         this.formaPagamento = formaPagamento;
         return this;
     }
-
-    /*public PedidoTestesDataBuilder setValorEntrega(Moeda valorEntrega) {
-        this.valorEntrega = valorEntrega;
-        return this;
-    }
-
-    public PedidoTestesDataBuilder setPrevisaoEntrega(LocalDate previsaoEntrega) {
-        this.previsaoEntrega = previsaoEntrega;
-        return this;
-    }*/
 
     public PedidoTestesDataBuilder setEntrega(InformacoesEntrega entrega) {
         this.entrega = entrega;

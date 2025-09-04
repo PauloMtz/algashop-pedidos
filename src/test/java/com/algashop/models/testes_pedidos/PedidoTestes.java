@@ -69,7 +69,6 @@ public class PedidoTestes {
     @Test
     public void gerarErroModificarListaItens() {
         Pedido pedido = Pedido.rascunhoPedido(new ClienteId());
-        //ProdutoId produtoId = new ProdutoId();
         Produto produto = ProdutoTestesDataBuilder.produtoAleatorio().build();
 
         pedido.adicionarItem(produto, new Quantidade(1));
@@ -82,7 +81,6 @@ public class PedidoTestes {
     @Test
     public void recalcularTotal() {
         Pedido pedido = Pedido.rascunhoPedido(new ClienteId());
-        //ProdutoId produtoId = new ProdutoId();
 
         pedido.adicionarItem(ProdutoTestesDataBuilder.produtoAleatorio().build(), 
             new Quantidade(2));
@@ -104,21 +102,6 @@ public class PedidoTestes {
 
     @Test
     public void alterarInformacoesFaturamento() {
-        /*ClienteEndereco endereco = ClienteEndereco.builder()
-            .logradouro("Rua Teste, 11")
-            .complemento("teste")
-            .bairro("Bairro Teste")
-            .cidade("Cidade Teste")
-            .estado("TT")
-            .cep(new ClienteCEP("12345678"))
-        .build();
-
-        InformacoesCobranca faturamento = InformacoesCobranca.builder()
-            .endereco(endereco)
-            .cpf(new ClienteCPF("123.456.789-01"))
-            .telefone(new ClienteTelefone("(00) 0001-0002"))
-            .nome(new ClienteNome("Fulano", "de Tal"))
-        .build();*/
         InformacoesCobranca faturamento = PedidoTestesDataBuilder.infoCobranca();
 
         Pedido pedido = Pedido.rascunhoPedido(new ClienteId());
@@ -126,36 +109,6 @@ public class PedidoTestes {
 
         Assertions.assertThat(pedido.getFaturamento()).isEqualTo(faturamento);
     }
-
-    /*@Test
-    public void alterarInformacoesEntrega() {
-        ClienteEndereco endereco = ClienteEndereco.builder()
-            .logradouro("Rua Teste, 11")
-            .complemento("teste")
-            .bairro("Bairro Teste")
-            .cidade("Cidade Teste")
-            .estado("TT")
-            .cep(new ClienteCEP("12345678"))
-        .build();
-
-        InformacoesEntrega entrega = InformacoesEntrega.builder()
-            .endereco(endereco)
-            .nome(new ClienteNome("Fulano", "de Tal"))
-            .cpf(new ClienteCPF("123.456.789-01"))
-            .telefone(new ClienteTelefone("(01) 0001-0002"))
-        .build();
-
-        Pedido pedido = Pedido.rascunhoPedido(new ClienteId());
-        Moeda valorEntrega = Moeda.ZERO;
-        LocalDate previsaoEntrega = LocalDate.now().plusDays(1);
-        pedido.alterarEntrega(entrega, valorEntrega, previsaoEntrega);
-
-        Assertions.assertWith(pedido, 
-            p -> Assertions.assertThat(p.getEntrega()).isEqualTo(entrega),
-            p -> Assertions.assertThat(p.getValorEntrega()).isEqualTo(valorEntrega),
-            p -> Assertions.assertThat(p.getPrevisaoEntrega()).isEqualTo(previsaoEntrega)
-        );
-    }*/
 
     @Test
     public void alterarInformacoesEntrega() {
@@ -172,28 +125,12 @@ public class PedidoTestes {
 
     @Test
     public void entregaNaoPodeSerPassado() {
-        /*ClienteEndereco endereco = ClienteEndereco.builder()
-            .logradouro("Rua Teste, 11")
-            .complemento("teste")
-            .bairro("Bairro Teste")
-            .cidade("Cidade Teste")
-            .estado("TT")
-            .cep(new ClienteCEP("12345678"))
-        .build();
-
-        InformacoesEntrega entrega = InformacoesEntrega.builder()
-            .endereco(endereco)
-            .nome(new ClienteNome("Fulano", "de Tal"))
-            .cpf(new ClienteCPF("123.456.789-01"))
-            .telefone(new ClienteTelefone("(01) 0001-0002"))
-        .build();*/
 
         LocalDate previsaoEntrega = LocalDate.now().minusDays(1);
         InformacoesEntrega entrega = PedidoTestesDataBuilder.infoEntrega().toBuilder()
             .previsaoEntrega(previsaoEntrega).build();
 
         Pedido pedido = Pedido.rascunhoPedido(new ClienteId());
-        //Moeda valorEntrega = Moeda.ZERO;
 
         Assertions.assertThatExceptionOfType(DataEntregaInvalidaException.class)
             .isThrownBy(() -> pedido.alterarEntrega(entrega));
@@ -206,7 +143,6 @@ public class PedidoTestes {
         pedido.adicionarItem(ProdutoTestesDataBuilder.produtoAleatorio().build(),
             new Quantidade(3));
 
-        // vai iterar pelo pedido que só tem 01 item
         PedidoItem item = pedido.getItens().iterator().next();
 
         pedido.alterarQtdeItens(item.getPedidoItemId(), new Quantidade(5));

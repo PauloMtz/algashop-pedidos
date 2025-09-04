@@ -32,19 +32,16 @@ public class Pedido {
     private ClienteId clienteId;
     private Moeda valorTotal;
     private Quantidade qtdeTotal;
-    private OffsetDateTime feitoEm; // placedAt
-    private OffsetDateTime pagoEm; // paidAt
+    private OffsetDateTime feitoEm;
+    private OffsetDateTime pagoEm;
     private OffsetDateTime canceladoEm;
     private OffsetDateTime finalizadoEm;
-    private InformacoesEntrega entrega; // shipping
-    private InformacoesCobranca faturamento; // billing
+    private InformacoesEntrega entrega;
+    private InformacoesCobranca faturamento;
     private PedidoStatus statusPedido;
     private FormasPagamento formasPagamento;
-    //private Moeda valorEntrega;
-    //private LocalDate previsaoEntrega;
     private Set<PedidoItem> itens;
 
-    // construtor com todos os parâmetros
     @Builder(builderClassName = "PedidoExistenteBuilder", builderMethodName = "pedidoExistenteBuilder")
     public Pedido(PedidoId pedidoId, ClienteId clienteId, Moeda valorTotal, 
         Quantidade qtdeTotal, OffsetDateTime feitoEm, OffsetDateTime pagoEm, 
@@ -64,12 +61,9 @@ public class Pedido {
         this.setFaturamento(faturamento);
         this.setStatusPedido(statusPedido);
         this.setFormasPagamento(formasPagamento);
-        //this.setValorEntrega(valorEntrega);
-        //this.setPrevisaoEntrega(previsaoEntrega);
         this.setItens(itens);
     }
 
-    // factory
     public static Pedido rascunhoPedido(ClienteId clienteId) {
 
         return new Pedido(
@@ -79,9 +73,6 @@ public class Pedido {
         );
     }
 
-    // métodos para alterar ações na classe
-    /*public void adicionarItem(ProdutoId produtoId, ProdutoNome produtoNome, 
-        Moeda preco, Quantidade qtde) {*/
     public void adicionarItem(Produto produto, Quantidade qtde) {
 
         Objects.requireNonNull(produto);
@@ -130,18 +121,11 @@ public class Pedido {
     }
 
     public void confirmarPedido() {
-        /*Objects.requireNonNull(this.getEntrega());
-        Objects.requireNonNull(this.getFaturamento());
-        Objects.requireNonNull(this.getPrevisaoEntrega());
-        Objects.requireNonNull(this.getValorEntrega());
-        Objects.requireNonNull(this.getFormasPagamento());
-        Objects.requireNonNull(this.getItens());*/
 
         if (this.getItens().isEmpty()) {
             this.verificarSePodeAlterarParaPedidoConfirmado();
         }
 
-        // altera antes de definir a data
         this.alterarStatus(PedidoStatus.FEITO);
         this.setFeitoEm(OffsetDateTime.now());
     }
@@ -170,8 +154,6 @@ public class Pedido {
 
     public void alterarEntrega(InformacoesEntrega novaEntrega) {
         Objects.requireNonNull(novaEntrega);
-        //Objects.requireNonNull(valor);
-        //Objects.requireNonNull(data);
 
         verificarSePodeEditarPedido();
 
@@ -181,8 +163,6 @@ public class Pedido {
 
         this.setEntrega(novaEntrega);
         this.recalcularTotal();
-        //this.setValorEntrega(valor);
-        //this.setPrevisaoEntrega(data);
     }
 
     public boolean estaRascunho() {
@@ -222,7 +202,6 @@ public class Pedido {
         }
 
         BigDecimal valorTotal = valorTotalItens.add(valorEntrega);
-        // faz nova redefinição dos setters
         this.setValorTotal(new Moeda(valorTotal));
         this.setQtdeTotal(new Quantidade(qtdeTotalItens));
     }
@@ -246,14 +225,6 @@ public class Pedido {
             throw PedidoNaoFeitoException.semInformacoesEntrega(pedidoId);
         }
 
-        /*if (this.getValorEntrega() == null) {
-            throw PedidoNaoFeitoException.valorEntregaInvalido(pedidoId);
-        }
-
-        if (this.getPrevisaoEntrega() == null) {
-            throw PedidoNaoFeitoException.previsaoEntregaInvalida(pedidoId);
-        }*/
-
         if (this.getFaturamento() == null) {
             throw PedidoNaoFeitoException.semInformacoesCobranca(pedidoId);
         }
@@ -276,7 +247,6 @@ public class Pedido {
         }
     }
 
-    // getters
     public PedidoId getPedidoId() {
         return pedidoId;
     }
@@ -325,21 +295,11 @@ public class Pedido {
         return formasPagamento;
     }
 
-    /*public Moeda getValorEntrega() {
-        return valorEntrega;
-    }
-
-    public LocalDate getPrevisaoEntrega() {
-        return previsaoEntrega;
-    }*/
-
     // essa lista não poderá ser modificada
     public Set<PedidoItem> getItens() {
-        //return itens;
         return Collections.unmodifiableSet(this.itens);
     }
 
-    // setters - private
     private void setPedidoId(PedidoId pedidoId) {
         Objects.requireNonNull(pedidoId);
         this.pedidoId = pedidoId;
@@ -392,14 +352,6 @@ public class Pedido {
     private void setFormasPagamento(FormasPagamento formasPagamento) {
         this.formasPagamento = formasPagamento;
     }
-
-    /*private void setValorEntrega(Moeda valorEntrega) {
-        this.valorEntrega = valorEntrega;
-    }
-
-    private void setPrevisaoEntrega(LocalDate previsaoEntrega) {
-        this.previsaoEntrega = previsaoEntrega;
-    }*/
 
     private void setItens(Set<PedidoItem> itens) {
         Objects.requireNonNull(itens);

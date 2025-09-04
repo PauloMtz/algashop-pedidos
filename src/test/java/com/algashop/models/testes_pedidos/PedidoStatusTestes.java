@@ -23,7 +23,6 @@ public class PedidoStatusTestes {
 
     @Test
     public void alterarParaPedidoFeito() {
-        //Pedido pedido = Pedido.rascunhoPedido(new ClienteId());
         Pedido pedido = PedidoTestesDataBuilder.novoPedido().build();
         pedido.confirmarPedido();
         Assertions.assertThat(pedido.estaFeito()).isTrue();
@@ -40,9 +39,8 @@ public class PedidoStatusTestes {
 
     @Test
     public void naoPodeAlterarParaPedidoFeito() {
-        //Pedido pedido = Pedido.rascunhoPedido(new ClienteId());
         Pedido pedido = PedidoTestesDataBuilder.novoPedido().setStatusPedido(PedidoStatus.FEITO).build();
-        //pedido.confirmarPedido();
+
         Assertions.assertThatExceptionOfType(StatusPedidoNaoPodeAlterarException.class)
             .isThrownBy(() -> pedido.confirmarPedido());
     }

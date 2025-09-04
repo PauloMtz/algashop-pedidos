@@ -6,7 +6,6 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 public class ValidacaoCampos {
     
-    // construtor privado
     private ValidacaoCampos() {}
 
     public static void requerCampoPreenchido(String valor) {
