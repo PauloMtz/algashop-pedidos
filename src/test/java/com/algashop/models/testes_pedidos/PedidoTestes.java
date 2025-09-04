@@ -1,4 +1,4 @@
-package com.algashop.models;
+package com.algashop.models.testes_pedidos;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -20,12 +20,31 @@ import com.algashop.domain.valueObjects.ProdutoNome;
 import com.algashop.domain.valueObjects.Quantidade;
 import com.algashop.domain.valueObjects.id.ClienteId;
 import com.algashop.domain.valueObjects.id.ProdutoId;
+import com.algashop.models.ProdutoTestesDataBuilder;
 
 public class PedidoTestes {
     
     @Test
     public void gerarNovoPedido() {
-        Pedido.rascunhoPedido(new ClienteId());
+        ClienteId clienteId = new ClienteId();
+        Pedido pedido = Pedido.rascunhoPedido(clienteId);
+
+        Assertions.assertWith(pedido, 
+            p -> Assertions.assertThat(p.getPedidoId()).isNotNull(),
+            p -> Assertions.assertThat(p.getClienteId()).isEqualTo(clienteId),
+            p -> Assertions.assertThat(p.getValorTotal()).isEqualTo(Moeda.ZERO),
+            p -> Assertions.assertThat(p.getQtdeTotal()).isEqualTo(Quantidade.ZERO),
+            p -> Assertions.assertThat(p.estaRascunho()).isTrue(),
+            p -> Assertions.assertThat(p.getItens()).isEmpty(),
+
+            p -> Assertions.assertThat(p.getFeitoEm()).isNull(),
+            p -> Assertions.assertThat(p.getPagoEm()).isNull(),
+            p -> Assertions.assertThat(p.getCanceladoEm()).isNull(),
+            p -> Assertions.assertThat(p.getFinalizadoEm()).isNull(),
+            p -> Assertions.assertThat(p.getFaturamento()).isNull(),
+            p -> Assertions.assertThat(p.getEntrega()).isNull(),
+            p -> Assertions.assertThat(p.getFormasPagamento()).isNull()
+        );
     }
 
     @Test

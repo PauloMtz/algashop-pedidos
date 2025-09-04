@@ -1,4 +1,4 @@
-package com.algashop.models;
+package com.algashop.models.testes_pedidos;
 
 import java.time.LocalDate;
 
@@ -18,6 +18,7 @@ import com.algashop.domain.valueObjects.InformacoesEntrega;
 import com.algashop.domain.valueObjects.Moeda;
 import com.algashop.domain.valueObjects.Quantidade;
 import com.algashop.domain.valueObjects.id.ClienteId;
+import com.algashop.models.ProdutoTestesDataBuilder;
 
 public class PedidoTestesDataBuilder {
     
@@ -69,7 +70,11 @@ public class PedidoTestesDataBuilder {
                 pedido.confirmarPedido();
                 pedido.pedidoPago();
             }
-            case PRONTO -> {}
+            case PRONTO -> {
+                pedido.confirmarPedido();
+                pedido.pedidoPago();
+                pedido.pedidoPronto();
+            }
             case CANCELADO -> {}
         }
 

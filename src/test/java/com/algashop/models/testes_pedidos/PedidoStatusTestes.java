@@ -1,4 +1,4 @@
-package com.algashop.models;
+package com.algashop.models.testes_pedidos;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

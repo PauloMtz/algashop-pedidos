@@ -20,4 +20,6 @@ public class MensagensErros {
 
     public static final String ERRO_PEDIDO_NAO_TEM_ITEM = "Adicione itens ao pedido %s";
     public static final String ERRO_PRODUTO_NAO_TEM_ESTOQUE = "Produto %s indisponível em estoque";
+
+    public static final String ERRO_PEDIDO_NAO_PODE_EDITAR = "Pedido %s com status %s não pode ser editado";
 }

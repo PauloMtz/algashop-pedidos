@@ -13,6 +13,7 @@ import com.algashop.domain.enums.PedidoStatus;
 import com.algashop.domain.exceptions.DataEntregaInvalidaException;
 import com.algashop.domain.exceptions.PedidoNaoContemItemException;
 import com.algashop.domain.exceptions.PedidoNaoFeitoException;
+import com.algashop.domain.exceptions.PedidoNaoPodeEditarException;
 import com.algashop.domain.exceptions.StatusPedidoNaoPodeAlterarException;
 import com.algashop.domain.valueObjects.InformacoesCobranca;
 import com.algashop.domain.valueObjects.InformacoesEntrega;
@@ -86,6 +87,7 @@ public class Pedido {
         Objects.requireNonNull(produto);
         Objects.requireNonNull(qtde);
 
+        verificarSePodeEditarPedido();
         produto.verificarSeTemEstoque();
         
         PedidoItem pedidoItem = PedidoItem.novoPedidoItemBuilder()
@@ -103,9 +105,24 @@ public class Pedido {
         this.recalcularTotal();
     }
 
+    public void removerItemPedido(PedidoItemId itemId) {
+        Objects.requireNonNull(itemId);
+        verificarSePodeEditarPedido();
+        PedidoItem item = buscarItemPedido(itemId);
+        this.itens.remove(item);
+        recalcularTotal();
+    }
+
+    public void cancelarPedido() {
+        this.setCanceladoEm(OffsetDateTime.now());
+        this.alterarStatus(PedidoStatus.CANCELADO);
+    }
+
     public void alterarQtdeItens(PedidoItemId itemId, Quantidade qtde) {
         Objects.requireNonNull(itemId);
         Objects.requireNonNull(qtde);
+
+        verificarSePodeEditarPedido();
 
         PedidoItem itemPedido = this.buscarItemPedido(itemId);
         itemPedido.alterarQtde(qtde);
@@ -129,6 +146,11 @@ public class Pedido {
         this.setFeitoEm(OffsetDateTime.now());
     }
 
+    public void pedidoPronto() {
+        this.setPagoEm(OffsetDateTime.now());
+        this.alterarStatus(PedidoStatus.PRONTO);
+    }
+
     public void pedidoPago() {
         this.setPagoEm(OffsetDateTime.now());
         this.alterarStatus(PedidoStatus.PAGO);
@@ -136,11 +158,13 @@ public class Pedido {
 
     public void alterarFormaPagamento(FormasPagamento formaPgto) {
         Objects.requireNonNull(formaPgto);
+        verificarSePodeEditarPedido();
         this.setFormasPagamento(formaPgto);
     }
 
     public void alterarInfoFaturamento(InformacoesCobranca infoFaturamento) {
         Objects.requireNonNull(infoFaturamento);
+        verificarSePodeEditarPedido();
         this.setFaturamento(infoFaturamento);
     }
 
@@ -148,6 +172,8 @@ public class Pedido {
         Objects.requireNonNull(novaEntrega);
         //Objects.requireNonNull(valor);
         //Objects.requireNonNull(data);
+
+        verificarSePodeEditarPedido();
 
         if (novaEntrega.previsaoEntrega().isBefore(LocalDate.now())) {
             throw new DataEntregaInvalidaException(this.getPedidoId());
@@ -173,6 +199,10 @@ public class Pedido {
 
     public boolean estaPago() {
         return PedidoStatus.PAGO.equals(this.getStatusPedido());
+    }
+
+    public boolean estaCancelado() {
+        return PedidoStatus.CANCELADO.equals(this.getStatusPedido());
     }
 
     private void recalcularTotal() {
@@ -238,6 +268,12 @@ public class Pedido {
         return this.getItens().stream()
             .filter(i -> i.getPedidoItemId().equals(itemId)).findFirst()
             .orElseThrow(() -> new PedidoNaoContemItemException(this.getPedidoId(), itemId));
+    }
+
+    private void verificarSePodeEditarPedido() {
+        if (!this.estaRascunho()) {
+            throw new PedidoNaoPodeEditarException(this.getPedidoId(), this.getStatusPedido());
+        }
     }
 
     // getters
