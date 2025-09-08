@@ -22,4 +22,7 @@ public class MensagensErros {
     public static final String ERRO_PRODUTO_NAO_TEM_ESTOQUE = "Produto %s indisponível em estoque";
 
     public static final String ERRO_PEDIDO_NAO_PODE_EDITAR = "Pedido %s com status %s não pode ser editado";
+    public static final String ERRO_CARRINHO_ITEM_INCOMPATIVEL = "O carrinho %s não pode ser atualizado, produto incompatível %s";
+    public static final String ERRO_CARRINHO_NAO_CONTEM_ITEM = "O carrinho %s não contém o item %s";
+    public static final String ERRO_CARRINHO_NAO_CONTEM_PRODUTO = "O carrinho %s não contém o produto %s";
 }
