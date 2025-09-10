@@ -30,7 +30,7 @@ public class PedidoTestes {
         Pedido pedido = Pedido.rascunhoPedido(clienteId);
 
         Assertions.assertWith(pedido, 
-            p -> Assertions.assertThat(p.getPedidoId()).isNotNull(),
+            p -> Assertions.assertThat(p.getId()).isNotNull(),
             p -> Assertions.assertThat(p.getClienteId()).isEqualTo(clienteId),
             p -> Assertions.assertThat(p.getValorTotal()).isEqualTo(Moeda.ZERO),
             p -> Assertions.assertThat(p.getQtdeTotal()).isEqualTo(Quantidade.ZERO),

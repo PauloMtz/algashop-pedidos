@@ -25,7 +25,7 @@ public class CarrinhoComprasTestes {
         CarrinhoCompras carrinho = CarrinhoCompras.iniciarCompra(clienteId);
 
         Assertions.assertWith(carrinho,
-            c -> Assertions.assertThat(c.getCarrinhoComprasId()).isNotNull(),
+            c -> Assertions.assertThat(c.getId()).isNotNull(),
             c -> Assertions.assertThat(c.getClienteId()).isEqualTo(clienteId),
             c -> Assertions.assertThat(c.getValorTotal()).isEqualTo(Moeda.ZERO),
             c -> Assertions.assertThat(c.getQtdeItens()).isEqualTo(Quantidade.ZERO),

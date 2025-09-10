@@ -17,7 +17,7 @@ import com.algashop.domain.valueObjects.id.ClienteId;
 
 import lombok.Builder;
 
-public class Cliente {
+public class Cliente implements AggregateRoot<ClienteId> {
     
     private ClienteId id;
     private ClienteNome nome;
@@ -141,7 +141,7 @@ public class Cliente {
     }
 
     // métodos getters
-    public ClienteId id() {
+    public ClienteId getId() {
         return id;
     }
 

@@ -26,9 +26,9 @@ import com.algashop.domain.valueObjects.id.PedidoItemId;
 
 import lombok.Builder;
 
-public class Pedido {
+public class Pedido implements AggregateRoot<PedidoId> {
 
-    private PedidoId pedidoId;
+    private PedidoId id;
     private ClienteId clienteId;
     private Moeda valorTotal;
     private Quantidade qtdeTotal;
@@ -82,7 +82,7 @@ public class Pedido {
         produto.verificarSeTemEstoque();
         
         PedidoItem pedidoItem = PedidoItem.novoPedidoItemBuilder()
-            .pedidoId(this.pedidoId)
+            .pedidoId(this.id)
             .qtde(qtde)
             .produto(produto)
             .build();
@@ -158,7 +158,7 @@ public class Pedido {
         verificarSePodeEditarPedido();
 
         if (novaEntrega.previsaoEntrega().isBefore(LocalDate.now())) {
-            throw new DataEntregaInvalidaException(this.getPedidoId());
+            throw new DataEntregaInvalidaException(this.getId());
         }
 
         this.setEntrega(novaEntrega);
@@ -210,7 +210,7 @@ public class Pedido {
         Objects.requireNonNull(novoStatus);
 
         if (this.getStatusPedido().naoPodeAlterarStatus(novoStatus)) {
-            throw new StatusPedidoNaoPodeAlterarException(this.getPedidoId(), this.getStatusPedido(), novoStatus);
+            throw new StatusPedidoNaoPodeAlterarException(this.getId(), this.getStatusPedido(), novoStatus);
         }
 
         this.setStatusPedido(novoStatus);
@@ -218,19 +218,19 @@ public class Pedido {
 
     private void verificarSePodeAlterarParaPedidoConfirmado() {
         if (this.getItens() == null || this.getItens().isEmpty()) {
-            throw PedidoNaoFeitoException.semItens(pedidoId);
+            throw PedidoNaoFeitoException.semItens(id);
         }
 
         if (this.getEntrega() == null) {
-            throw PedidoNaoFeitoException.semInformacoesEntrega(pedidoId);
+            throw PedidoNaoFeitoException.semInformacoesEntrega(id);
         }
 
         if (this.getFaturamento() == null) {
-            throw PedidoNaoFeitoException.semInformacoesCobranca(pedidoId);
+            throw PedidoNaoFeitoException.semInformacoesCobranca(id);
         }
 
         if (this.getFormasPagamento() == null) {
-            throw PedidoNaoFeitoException.metodoPagamentoInvalido(pedidoId);
+            throw PedidoNaoFeitoException.metodoPagamentoInvalido(id);
         }
     }
 
@@ -238,17 +238,17 @@ public class Pedido {
         Objects.requireNonNull(itemId);
         return this.getItens().stream()
             .filter(i -> i.getPedidoItemId().equals(itemId)).findFirst()
-            .orElseThrow(() -> new PedidoNaoContemItemException(this.getPedidoId(), itemId));
+            .orElseThrow(() -> new PedidoNaoContemItemException(this.getId(), itemId));
     }
 
     private void verificarSePodeEditarPedido() {
         if (!this.estaRascunho()) {
-            throw new PedidoNaoPodeEditarException(this.getPedidoId(), this.getStatusPedido());
+            throw new PedidoNaoPodeEditarException(this.getId(), this.getStatusPedido());
         }
     }
 
-    public PedidoId getPedidoId() {
-        return pedidoId;
+    public PedidoId getId() {
+        return id;
     }
 
     public ClienteId getClienteId() {
@@ -302,7 +302,7 @@ public class Pedido {
 
     private void setPedidoId(PedidoId pedidoId) {
         Objects.requireNonNull(pedidoId);
-        this.pedidoId = pedidoId;
+        this.id = pedidoId;
     }
 
     private void setClienteId(ClienteId clienteId) {
@@ -362,7 +362,7 @@ public class Pedido {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((pedidoId == null) ? 0 : pedidoId.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -375,10 +375,10 @@ public class Pedido {
         if (getClass() != obj.getClass())
             return false;
         Pedido other = (Pedido) obj;
-        if (pedidoId == null) {
-            if (other.pedidoId != null)
+        if (id == null) {
+            if (other.id != null)
                 return false;
-        } else if (!pedidoId.equals(other.pedidoId))
+        } else if (!id.equals(other.id))
             return false;
         return true;
     }

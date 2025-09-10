@@ -1,0 +1,244 @@
+-------------------------------- CONFIGURAÇÃO --------------------------------------------
+### Como fica no `pom.xml`:
+
+```xml
+<build>
+    <plugins>
+        <!-- Plugin para testes unitários -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.2.5</version>
+            <configuration>
+                <!-- Executa apenas testes unitários (*Test) -->
+                <includes>
+                    <include>**/*Test.java</include>
+                </includes>
+                <excludes>
+                    <exclude>**/*IT.java</exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+
+        <!-- Plugin para testes de integração -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.2.5</version>
+            <executions>
+                <execution>
+                    <id>integration-test</id>
+                    <goals>
+                        <goal>integration-test</goal>
+                        <goal>verify</goal>
+                    </goals>
+                    <configuration>
+                        <!-- Executa apenas *IT -->
+                        <includes>
+                            <include>**/*IT.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/*Test.java</exclude>
+                        </excludes>
+                        <useModulePath>false</useModulePath>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+
+---
+
+### Como executar:
+
+* **Rodar só testes unitários**
+
+  ```bash
+  mvn test
+  ```
+
+* **Rodar só testes de integração**
+
+  ```bash
+  mvn failsafe:integration-test
+  ```
+
+* **Rodar tudo (unit + integração)**
+
+  ```bash
+  mvn verify
+  ```
+
+---
+
+* `Surefire` = seu `test { ... exclude *IT }`
+* `Failsafe` = seu `integrationTest { ... include *IT }`
+
+-------------------------------- EXEMPLO DE APLICAÇÃO ----------------------------------------------------
+
+Beleza 🚀 vou te mostrar um exemplo **mínimo e funcional** de `pom.xml` para rodar em **Maven + Java 17**, com:
+
+* `maven-surefire-plugin` → executa apenas `*Test.java` (unitários)
+* `maven-failsafe-plugin` → executa apenas `*IT.java` (integração)
+* `junit-jupiter` (JUnit 5) configurado corretamente
+
+---
+
+### 📌 `pom.xml` completo
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.exemplo</groupId>
+    <artifactId>demo-tests</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <!-- Versão do Java -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+
+        <!-- Versões dos plugins -->
+        <surefire.version>3.2.5</surefire.version>
+        <failsafe.version>3.2.5</failsafe.version>
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
+    </properties>
+
+    <dependencies>
+        <!-- JUnit 5 (API + Engine para execução) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Plugin para testes unitários -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <!-- Plugin para testes de integração -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${failsafe.version}</version>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*Test.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+---
+
+### 📌 Estrutura mínima de pastas
+
+```
+src/
+ └── test/
+      └── java/
+           ├── com/exemplo/ExemploTest.java   # Teste unitário
+           └── com/exemplo/ExemploIT.java     # Teste de integração
+```
+
+---
+
+### 📌 Exemplos de testes
+
+**`ExemploTest.java` (unitário)**
+
+```java
+package com.exemplo;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ExemploTest {
+    @Test
+    void somaDeveFuncionar() {
+        assertEquals(4, 2 + 2);
+    }
+}
+```
+
+**`ExemploIT.java` (integração)**
+
+```java
+package com.exemplo;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class ExemploIT {
+    @Test
+    void testeDeIntegracao() {
+        assertTrue("Hello".startsWith("H"));
+    }
+}
+```
+
+---
+
+### 📌 Como rodar
+
+* **Rodar só testes unitários**
+
+  ```bash
+  mvn test
+  ```
+
+* **Rodar só testes de integração**
+
+  ```bash
+  mvn failsafe:integration-test
+  ```
+
+* **Rodar unitários + integração (fluxo completo)**
+
+  ```bash
+  mvn verify
+  ```
+
+---
+
+👉 Esse `pom.xml` é pronto para copiar/colar e já funciona em JDK-17.
+
+

@@ -20,9 +20,9 @@ import com.algashop.domain.valueObjects.id.ProdutoId;
 
 import lombok.Builder;
 
-public class CarrinhoCompras {
+public class CarrinhoCompras implements AggregateRoot<CarrinhoComprasId> {
 
-    private CarrinhoComprasId carrinhoComprasId;
+    private CarrinhoComprasId id;
     private ClienteId clienteId;
     private Moeda valorTotal;
     private Quantidade qtdeItens;
@@ -53,7 +53,7 @@ public class CarrinhoCompras {
         produto.verificarSeTemEstoque();
 
         CarrinhoComprasItem carrinhoItem = CarrinhoComprasItem.novoItemCarrinho()
-            .carrinhoComprasId(this.getCarrinhoComprasId())
+            .carrinhoComprasId(this.getId())
             .produtoId(produto.id())
             .produtoNome(produto.nome())
             .preco(produto.preco())
@@ -77,14 +77,14 @@ public class CarrinhoCompras {
         Objects.requireNonNull(itemId);
         return this.itens.stream()
                 .filter(i -> i.getCarrinhoComprasItemId().equals(itemId)).findFirst()
-                .orElseThrow(() -> new CarrinhoComprasNaoContemItemException(this.getCarrinhoComprasId(), itemId));
+                .orElseThrow(() -> new CarrinhoComprasNaoContemItemException(this.getId(), itemId));
     }
 
     public CarrinhoComprasItem buscarItem(ProdutoId produtoId) {
         Objects.requireNonNull(produtoId);
         return this.itens.stream()
                 .filter(i -> i.getProdutoId().equals(produtoId)).findFirst()
-                .orElseThrow(() -> new CarrinhoComprasNaoContemProdutoException(this.getCarrinhoComprasId(), produtoId));
+                .orElseThrow(() -> new CarrinhoComprasNaoContemProdutoException(this.getId(), produtoId));
     }
 
     public void atualizarItem(Produto produto) {
@@ -114,8 +114,8 @@ public class CarrinhoCompras {
     }
 
     // getters
-    public CarrinhoComprasId getCarrinhoComprasId() {
-        return carrinhoComprasId;
+    public CarrinhoComprasId getId() {
+        return id;
     }
 
     public ClienteId getClienteId() {
@@ -141,7 +141,7 @@ public class CarrinhoCompras {
 
     private void setCarrinhoComprasId(CarrinhoComprasId carrinhoComprasId) {
         Objects.requireNonNull(carrinhoComprasId);
-        this.carrinhoComprasId = carrinhoComprasId;
+        this.id = carrinhoComprasId;
     }
 
     private void setClienteId(ClienteId clienteId) {
@@ -204,7 +204,7 @@ public class CarrinhoCompras {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((carrinhoComprasId == null) ? 0 : carrinhoComprasId.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -217,10 +217,10 @@ public class CarrinhoCompras {
         if (getClass() != obj.getClass())
             return false;
         CarrinhoCompras other = (CarrinhoCompras) obj;
-        if (carrinhoComprasId == null) {
-            if (other.carrinhoComprasId != null)
+        if (id == null) {
+            if (other.id != null)
                 return false;
-        } else if (!carrinhoComprasId.equals(other.carrinhoComprasId))
+        } else if (!id.equals(other.id))
             return false;
         return true;
     }
