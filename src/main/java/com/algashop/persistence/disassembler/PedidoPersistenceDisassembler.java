@@ -29,6 +29,7 @@ public class PedidoPersistenceDisassembler {
             .canceladoEm(persistenceEntity.getCanceladoEm())
             .finalizadoEm(persistenceEntity.getFinalizadoEm())
             .itens(new HashSet<>())
+            .versaoPedido(persistenceEntity.getVersaoPedido())
             .build();
     }
 }

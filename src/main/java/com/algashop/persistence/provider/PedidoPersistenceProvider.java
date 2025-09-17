@@ -1,7 +1,9 @@
 package com.algashop.persistence.provider;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
+import org.springframework.data.util.ReflectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.algashop.domain.models.Pedido;
@@ -12,16 +14,19 @@ import com.algashop.persistence.disassembler.PedidoPersistenceDisassembler;
 import com.algashop.persistence.entity.PedidoPersistenceEntity;
 import com.algashop.persistence.repository.PedidoRepository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 @Component
 @RequiredArgsConstructor
 public class PedidoPersistenceProvider implements PedidoRepositorio {
 
-    //private final PedidoPersistenceEntity persistenceEntity;
     private final PedidoRepository pedidoRepository;
     private final PedidoPersistenceAssembler assembler;
     private final PedidoPersistenceDisassembler disassembler;
+
+    private final EntityManager entityManager;
 
     @Override
     public Optional<Pedido> buscaId(PedidoId id) {
@@ -36,13 +41,19 @@ public class PedidoPersistenceProvider implements PedidoRepositorio {
 
     @Override
     public void adicionar(Pedido aggregateRoot) {
-        /*var persistenceEntity = PedidoPersistenceEntity.builder()
-            .id(aggregateRoot.getId().valor().toLong())
-            .clienteId(aggregateRoot.getClienteId().valor())
-            .build();*/
+        long pedidoId = aggregateRoot.getId().valor().toLong();
 
-        PedidoPersistenceEntity persistenceEntity = assembler.fromDomainEntity(aggregateRoot);
-        pedidoRepository.saveAndFlush(persistenceEntity);
+        pedidoRepository.findById(pedidoId).ifPresentOrElse(
+            (persistenceEntity) -> {
+                atualizar(aggregateRoot, persistenceEntity);
+            }, 
+            () -> {
+                inserir(aggregateRoot);
+            }
+        );
+
+        /*PedidoPersistenceEntity persistenceEntity = assembler.fromDomainEntity(aggregateRoot);
+        pedidoRepository.saveAndFlush(persistenceEntity);*/
     }
 
     @Override
@@ -50,4 +61,28 @@ public class PedidoPersistenceProvider implements PedidoRepositorio {
         return 0;
     }
     
+    private void inserir(Pedido aggregateRoot) {
+        PedidoPersistenceEntity persistenceEntity = assembler.fromDomainEntity(aggregateRoot);
+        pedidoRepository.saveAndFlush(persistenceEntity);
+        //aggregateRoot.setVersaoPedido(persistenceEntity.getVersaoPedido());
+        atualizarVersaoPedido(aggregateRoot, persistenceEntity);
+    }
+
+    private void atualizar(Pedido aggregateRoot, PedidoPersistenceEntity persistenceEntity) {
+        persistenceEntity = assembler.mergeEntity(persistenceEntity, aggregateRoot);
+        entityManager.detach(persistenceEntity); // não gerenciar de forma automática
+        // atribui estado novamente (persistenceEntity)
+        persistenceEntity = pedidoRepository.saveAndFlush(persistenceEntity);
+        // atualiza versão do pedido (isso com setter publico)
+        //aggregateRoot.setVersaoPedido(persistenceEntity.getVersaoPedido());
+        atualizarVersaoPedido(aggregateRoot, persistenceEntity);
+    }
+
+    @SneakyThrows
+    private void atualizarVersaoPedido(Pedido aggregateRoot, PedidoPersistenceEntity persistenceEntity) {
+        Field versaoPedido = aggregateRoot.getClass().getDeclaredField("versaoPedido");
+        versaoPedido.setAccessible(true);
+        ReflectionUtils.setField(versaoPedido, aggregateRoot, persistenceEntity.getVersaoPedido());
+        versaoPedido.setAccessible(false);
+    }
 }

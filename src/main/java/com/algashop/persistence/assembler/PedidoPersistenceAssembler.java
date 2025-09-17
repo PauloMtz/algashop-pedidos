@@ -9,10 +9,10 @@ import com.algashop.persistence.entity.PedidoPersistenceEntity;
 public class PedidoPersistenceAssembler {
     
     public PedidoPersistenceEntity fromDomainEntity(Pedido pedido) {
-        return mergEntity(new PedidoPersistenceEntity(), pedido);
+        return mergeEntity(new PedidoPersistenceEntity(), pedido);
     }
 
-    public PedidoPersistenceEntity mergEntity(PedidoPersistenceEntity persistenceEntity, Pedido pedido) {
+    public PedidoPersistenceEntity mergeEntity(PedidoPersistenceEntity persistenceEntity, Pedido pedido) {
         
         persistenceEntity.setId(pedido.getId().valor().toLong());
         persistenceEntity.setClienteId(pedido.getClienteId().valor());
@@ -24,6 +24,7 @@ public class PedidoPersistenceAssembler {
         persistenceEntity.setPagoEm(pedido.getPagoEm());
         persistenceEntity.setCanceladoEm(pedido.getCanceladoEm());
         persistenceEntity.setFinalizadoEm(pedido.getFinalizadoEm());
+        persistenceEntity.setVersaoPedido(pedido.getVersaoPedido());
         
         return persistenceEntity;
     }

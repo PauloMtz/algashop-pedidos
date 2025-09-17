@@ -41,13 +41,14 @@ public class Pedido implements AggregateRoot<PedidoId> {
     private PedidoStatus statusPedido;
     private FormasPagamento formasPagamento;
     private Set<PedidoItem> itens;
+    private Long versaoPedido;
 
     @Builder(builderClassName = "PedidoExistenteBuilder", builderMethodName = "pedidoExistenteBuilder")
     public Pedido(PedidoId pedidoId, ClienteId clienteId, Moeda valorTotal, 
         Quantidade qtdeTotal, OffsetDateTime feitoEm, OffsetDateTime pagoEm, 
         OffsetDateTime canceladoEm, OffsetDateTime finalizadoEm, InformacoesEntrega entrega,
         InformacoesCobranca faturamento, PedidoStatus statusPedido, 
-        FormasPagamento formasPagamento, Set<PedidoItem> itens) {
+        FormasPagamento formasPagamento, Set<PedidoItem> itens, Long versaoPedido) {
 
         this.setPedidoId(pedidoId);
         this.setClienteId(clienteId);
@@ -62,6 +63,7 @@ public class Pedido implements AggregateRoot<PedidoId> {
         this.setStatusPedido(statusPedido);
         this.setFormasPagamento(formasPagamento);
         this.setItens(itens);
+        this.setVersaoPedido(versaoPedido);
     }
 
     public static Pedido rascunhoPedido(ClienteId clienteId) {
@@ -69,7 +71,7 @@ public class Pedido implements AggregateRoot<PedidoId> {
         return new Pedido(
             new PedidoId(), clienteId, Moeda.ZERO, Quantidade.ZERO, null, null, 
                 null, null, null, null, PedidoStatus.RASCUNHO, null,
-                new HashSet<>()
+                new HashSet<>(), null
         );
     }
 
@@ -300,6 +302,10 @@ public class Pedido implements AggregateRoot<PedidoId> {
         return Collections.unmodifiableSet(this.itens);
     }
 
+    public Long getVersaoPedido() {
+        return versaoPedido;
+    }
+
     private void setPedidoId(PedidoId pedidoId) {
         Objects.requireNonNull(pedidoId);
         this.id = pedidoId;
@@ -356,6 +362,10 @@ public class Pedido implements AggregateRoot<PedidoId> {
     private void setItens(Set<PedidoItem> itens) {
         Objects.requireNonNull(itens);
         this.itens = itens;
+    }
+
+    private void setVersaoPedido(Long versaoPedido) {
+        this.versaoPedido = versaoPedido;
     }
 
     @Override

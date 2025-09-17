@@ -14,13 +14,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 //import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.annotation.Import;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import com.algashop.domain.enums.PedidoStatus;
 import com.algashop.domain.models.Pedido;
 import com.algashop.domain.repository.PedidoRepositorio;
 //import com.algashop.domain.utils.IDGenerator;
 import com.algashop.domain.valueObjects.id.PedidoId;
 import com.algashop.models.testes_pedidos.PedidoTestesDataBuilder;
 import com.algashop.persistence.assembler.PedidoPersistenceAssembler;
+import com.algashop.persistence.config.SpringDataAuditoriaConfig;
 import com.algashop.persistence.disassembler.PedidoPersistenceDisassembler;
 import com.algashop.persistence.entity.PedidoPersistenceEntity;
 import com.algashop.persistence.provider.PedidoPersistenceProvider;
@@ -30,7 +33,7 @@ import com.algashop.persistence.repository.PedidoRepository;
 //@Transactional
 @DataJpaTest
 @Import({PedidoPersistenceProvider.class, PedidoPersistenceAssembler.class, 
-    PedidoPersistenceDisassembler.class})
+    PedidoPersistenceDisassembler.class, SpringDataAuditoriaConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class PedidoPersistenceIT {
 
@@ -106,5 +109,57 @@ public class PedidoPersistenceIT {
             p -> Assertions.assertThat(p.getStatusPedido()).isEqualTo(pedidoOriginal.getStatusPedido()),
             p -> Assertions.assertThat(p.getFormasPagamento()).isEqualTo(pedidoOriginal.getFormasPagamento())
         );
+    }
+
+    @Test
+    public void testaValoresAuditoria() {
+        PedidoPersistenceEntity persistenceEntity = PedidoPersistenceTestesDataBuilder.pedidoExistente().build();
+        persistenceEntity = pedidoRepository.saveAndFlush(persistenceEntity);
+
+        Assertions.assertThat(persistenceEntity.getCriadoPorUsuarioID()).isNotNull();
+        Assertions.assertThat(persistenceEntity.getUltimaModificacaoEm()).isNotNull();
+        Assertions.assertThat(persistenceEntity.getUltimaModificacaoPorUsuarioID()).isNotNull();
+    }
+
+    @Test
+    public void atualizaPedidoExistente() {
+        Pedido pedido = PedidoTestesDataBuilder.novoPedido().setStatusPedido(PedidoStatus.FEITO).build();
+        pedidoRepositorio.adicionar(pedido);
+
+        pedido = pedidoRepositorio.buscaId(pedido.getId()).orElseThrow();
+        pedido.pedidoPago();
+
+        pedidoRepositorio.adicionar(pedido);
+
+        pedido = pedidoRepositorio.buscaId(pedido.getId()).orElseThrow();
+
+        Assertions.assertThat(pedido.estaPago()).isTrue();
+    }
+
+    @Test
+    public void testeVersaoPedido() {
+        /*
+         * esse teste é para evitar que duas operações simultâneas ocorram
+         * quando pagar o pedido, não pode permitir seu cancelamento
+         */
+
+        Pedido pedido = PedidoTestesDataBuilder.novoPedido().setStatusPedido(PedidoStatus.FEITO).build();
+        pedidoRepositorio.adicionar(pedido);
+
+        Pedido pedido1 = pedidoRepositorio.buscaId(pedido.getId()).orElseThrow();
+        Pedido pedido2 = pedidoRepositorio.buscaId(pedido.getId()).orElseThrow();
+
+        pedido1.pedidoPago();
+        pedidoRepositorio.adicionar(pedido1);
+
+        pedido2.cancelarPedido();
+
+        Assertions.assertThatExceptionOfType(ObjectOptimisticLockingFailureException.class)
+            .isThrownBy(() -> pedidoRepositorio.adicionar(pedido2));
+
+        Pedido pedidoSalvo = pedidoRepositorio.buscaId(pedido.getId()).orElseThrow();
+
+        Assertions.assertThat(pedidoSalvo.getCanceladoEm()).isNull();
+        Assertions.assertThat(pedidoSalvo.getPagoEm()).isNotNull();
     }
 }
