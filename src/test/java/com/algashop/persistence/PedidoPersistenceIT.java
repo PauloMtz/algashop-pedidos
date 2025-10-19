@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 //import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
@@ -61,22 +60,15 @@ public class PedidoPersistenceIT {
 
     @Test
     public void persistirRegistro() {
-        //long pedidoId = IDGenerator.generateTSID().toLong();
-
-        /*PedidoPersistenceEntity pedido = PedidoPersistenceEntity.builder()
-            .id(pedidoId)
-            .clienteId(IDGenerator.generateTimeBaseUuid())
-            .qtdeTotalItens(2)
-            .valorTotal(new BigDecimal("1000"))
-            .formaPagamento("DEBITO")
-            .criadoEm(OffsetDateTime.now())
-            .build();*/
 
         PedidoPersistenceEntity pedido = PedidoPersistenceTestesDataBuilder.pedidoExistente().build();
 
         pedidoRepository.saveAndFlush(pedido);
-        //Assertions.assertThat(pedidoRepository.existsById(pedidoId)).isTrue();
         Assertions.assertThat(pedidoRepository.existsById(pedido.getId())).isTrue();
+
+        PedidoPersistenceEntity entidadeEncontrada = pedidoRepository.findById(pedido.getId()).orElseThrow();
+
+        Assertions.assertThat(entidadeEncontrada.getItens()).isNotEmpty();
     }
 
     // o @Transactional (do springboot) é para que um teste não influencie outro
@@ -161,5 +153,27 @@ public class PedidoPersistenceIT {
 
         Assertions.assertThat(pedidoSalvo.getCanceladoEm()).isNull();
         Assertions.assertThat(pedidoSalvo.getPagoEm()).isNotNull();
+    }
+
+    @Test
+    public void deveContarPedidosExistentes() {
+        Assertions.assertThat(pedidoRepositorio.contar()).isZero();
+
+        Pedido pedido1 = PedidoTestesDataBuilder.novoPedido().build();
+        Pedido pedido2 = PedidoTestesDataBuilder.novoPedido().build();
+
+        pedidoRepositorio.adicionar(pedido1);
+        pedidoRepositorio.adicionar(pedido2);
+
+        Assertions.assertThat(pedidoRepositorio.contar()).isEqualTo(2L);
+    }
+
+    @Test
+    public void retornaPedidoExistente() {
+        Pedido pedido = PedidoTestesDataBuilder.novoPedido().build();
+        pedidoRepositorio.adicionar(pedido);
+
+        Assertions.assertThat(pedidoRepositorio.existente(pedido.getId())).isTrue();
+        Assertions.assertThat(pedidoRepositorio.existente(new PedidoId())).isFalse();
     }
 }

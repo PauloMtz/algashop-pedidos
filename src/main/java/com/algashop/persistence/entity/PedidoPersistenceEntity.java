@@ -2,6 +2,8 @@ package com.algashop.persistence.entity;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -14,15 +16,15 @@ import com.algashop.persistence.embeddable.FaturamentoEmbeddable;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -34,8 +36,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @ToString(of = "id")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners(AuditingEntityListener.class)
@@ -111,4 +111,55 @@ public class PedidoPersistenceEntity {
         @AttributeOverride(name = "endereco.cep", column = @Column(name = "entrega_cep"))
     })
     private EntregaEmbeddable entrega;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ItemPedidoPersistenceEntity> itens = new HashSet<>();
+
+    @Builder
+    public PedidoPersistenceEntity(Long id, UUID clienteId, BigDecimal valorTotal, Integer qtdeTotalItens,
+            String status, String formaPagamento, OffsetDateTime criadoEm, OffsetDateTime pagoEm,
+            OffsetDateTime canceladoEm, OffsetDateTime finalizadoEm, UUID criadoPorUsuarioID,
+            OffsetDateTime ultimaModificacaoEm, UUID ultimaModificacaoPorUsuarioID, Long versaoPedido,
+            FaturamentoEmbeddable faturamento, EntregaEmbeddable entrega, Set<ItemPedidoPersistenceEntity> itens) {
+        this.id = id;
+        this.clienteId = clienteId;
+        this.valorTotal = valorTotal;
+        this.qtdeTotalItens = qtdeTotalItens;
+        this.status = status;
+        this.formaPagamento = formaPagamento;
+        this.criadoEm = criadoEm;
+        this.pagoEm = pagoEm;
+        this.canceladoEm = canceladoEm;
+        this.finalizadoEm = finalizadoEm;
+        this.criadoPorUsuarioID = criadoPorUsuarioID;
+        this.ultimaModificacaoEm = ultimaModificacaoEm;
+        this.ultimaModificacaoPorUsuarioID = ultimaModificacaoPorUsuarioID;
+        this.versaoPedido = versaoPedido;
+        this.faturamento = faturamento;
+        this.entrega = entrega;
+        this.substituirItens(itens);
+    }
+
+    public void substituirItens(Set<ItemPedidoPersistenceEntity> itens) {
+        if (itens == null || itens.isEmpty()) {
+            this.setItens(new HashSet<>());
+            return;
+        }
+
+        itens.forEach(i -> i.setPedido(this));
+        this.setItens(itens);
+    }
+
+    public void adicionarItem(ItemPedidoPersistenceEntity item) {
+        if (item == null) {
+            return;
+        }
+
+        if (this.getItens() == null) {
+            this.setItens(new HashSet<>());
+        }
+
+        item.setPedido(this);
+        this.getItens().add(item);
+    }
 }

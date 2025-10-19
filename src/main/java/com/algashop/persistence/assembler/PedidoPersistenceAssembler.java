@@ -1,8 +1,14 @@
 package com.algashop.persistence.assembler;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.algashop.domain.models.Pedido;
+import com.algashop.domain.models.PedidoItem;
 import com.algashop.domain.valueObjects.ClienteEndereco;
 import com.algashop.domain.valueObjects.Destinatario;
 import com.algashop.domain.valueObjects.InformacoesCobranca;
@@ -11,6 +17,7 @@ import com.algashop.persistence.embeddable.DestinatarioEmbeddable;
 import com.algashop.persistence.embeddable.EnderecoEmbeddable;
 import com.algashop.persistence.embeddable.EntregaEmbeddable;
 import com.algashop.persistence.embeddable.FaturamentoEmbeddable;
+import com.algashop.persistence.entity.ItemPedidoPersistenceEntity;
 import com.algashop.persistence.entity.PedidoPersistenceEntity;
 
 @Component
@@ -34,8 +41,9 @@ public class PedidoPersistenceAssembler {
         persistenceEntity.setFinalizadoEm(pedido.getFinalizadoEm());
         persistenceEntity.setVersaoPedido(pedido.getVersaoPedido());
         persistenceEntity.setEntrega(paraEntregaEmbeddable(pedido.getEntrega()));
-        persistenceEntity.setFaturamento(paraFaturamentoEmbeddable(pedido.getFaturamento())); 
-        
+        persistenceEntity.setFaturamento(paraFaturamentoEmbeddable(pedido.getFaturamento()));
+        Set<ItemPedidoPersistenceEntity> mergeItens = mergeItens(pedido, persistenceEntity);
+        persistenceEntity.substituirItens(mergeItens);
         return persistenceEntity;
     }
 
@@ -92,5 +100,59 @@ public class PedidoPersistenceAssembler {
             .telefone(cobranca.telefone().toString())
             .endereco(paraEnderecoEmbeddable(cobranca.endereco()))
             .build();
+    }
+
+    private Set<ItemPedidoPersistenceEntity> mergeItens(Pedido pedido, PedidoPersistenceEntity persistenceEntity) {
+       Set<PedidoItem> itensNovosOuAtualizados = pedido.getItens();
+
+       if (itensNovosOuAtualizados == null || itensNovosOuAtualizados.isEmpty()) {
+        return new HashSet<>();
+       }
+
+       Set<ItemPedidoPersistenceEntity> itensExistentes = persistenceEntity.getItens();
+
+       if (itensExistentes == null || itensExistentes.isEmpty()) {
+        return itensNovosOuAtualizados.stream()
+            .map(itemPedido -> aPartirDoDominio(itemPedido))
+            .collect(Collectors.toSet());
+       }
+
+       Map<Long, ItemPedidoPersistenceEntity> itensExistentesMap = itensExistentes.stream().collect(Collectors.toMap(ItemPedidoPersistenceEntity::getId, itemPedido -> itemPedido));
+
+       /*return itensNovosOuAtualizados.stream()
+        .map(itemPedido -> {
+            ItemPedidoPersistenceEntity itemPersistenceEntity = itensExistentesMap.getOrDefault(
+                itemPedido.getPedidoItemId().valor().toLong(), new ItemPedidoPersistenceEntity()
+            );
+
+            return mergeEntity(persistenceEntity, pedido);
+        }).collect(Collectors.toSet());*/
+
+        // sugestão ChatGpt
+        Set<ItemPedidoPersistenceEntity> itensAtualizados = itensNovosOuAtualizados.stream()
+            .map(itemPedido -> {
+                ItemPedidoPersistenceEntity existente =
+                    itensExistentesMap.getOrDefault(itemPedido.getPedidoItemId().valor().toLong(), new ItemPedidoPersistenceEntity());
+                ItemPedidoPersistenceEntity atualizado = mergeItemPedidoEntity(existente, itemPedido);
+                atualizado.setPedido(persistenceEntity);
+                return atualizado;
+            })
+            .collect(Collectors.toSet());
+
+        return itensAtualizados;
+    }
+
+    public ItemPedidoPersistenceEntity aPartirDoDominio(PedidoItem itemPedido) {
+        return mergeItemPedidoEntity(new ItemPedidoPersistenceEntity(), itemPedido);
+    }
+
+    private ItemPedidoPersistenceEntity mergeItemPedidoEntity(ItemPedidoPersistenceEntity itemPedidoPersistenceEntity, PedidoItem itemPedido) {
+        itemPedidoPersistenceEntity.setId(itemPedido.getPedidoItemId().valor().toLong());
+        itemPedidoPersistenceEntity.setProdutoId(itemPedido.getProdutoId().valor());
+        itemPedidoPersistenceEntity.setNomeProduto(itemPedido.getProdutoNome().valor());
+        itemPedidoPersistenceEntity.setPreco(itemPedido.getPreco().valor());
+        itemPedidoPersistenceEntity.setQuantidade(itemPedido.getQtde().valor());
+        itemPedidoPersistenceEntity.setValorTotal(itemPedido.getValorTotal().valor());
+        return itemPedidoPersistenceEntity;
     }
 }

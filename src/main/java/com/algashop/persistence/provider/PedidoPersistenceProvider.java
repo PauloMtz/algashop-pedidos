@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.util.ReflectionUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.algashop.domain.models.Pedido;
 import com.algashop.domain.repository.PedidoRepositorio;
@@ -20,6 +21,7 @@ import lombok.SneakyThrows;
 
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PedidoPersistenceProvider implements PedidoRepositorio {
 
     private final PedidoRepository pedidoRepository;
@@ -36,10 +38,11 @@ public class PedidoPersistenceProvider implements PedidoRepositorio {
 
     @Override
     public boolean existente(PedidoId id) {
-        return false;
+        return pedidoRepository.existsById(id.valor().toLong());
     }
 
     @Override
+    @Transactional(readOnly = false)
     public void adicionar(Pedido aggregateRoot) {
         long pedidoId = aggregateRoot.getId().valor().toLong();
 
@@ -57,8 +60,8 @@ public class PedidoPersistenceProvider implements PedidoRepositorio {
     }
 
     @Override
-    public int contar() {
-        return 0;
+    public long contar() {
+        return pedidoRepository.count();
     }
     
     private void inserir(Pedido aggregateRoot) {

@@ -8,5 +8,5 @@ public interface RepositorioApp<T extends AggregateRoot<ID>, ID> {
     Optional<T> buscaId(ID id);
     boolean existente(ID id);
     void adicionar(T aggregateRoot);
-    int contar();
+    long contar();
 }
